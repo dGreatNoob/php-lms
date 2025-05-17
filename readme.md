@@ -31,31 +31,7 @@ Pass: 123
 Email: admin_01@admin
 Pass: 123
 
-
-==== FOLDER STRUCTURE ====
-
-
-├── config/
-│   └── db.php
-├── auth/
-│   ├── login.php
-│   └── logout.php
-├── crud/
-│   ├── create.php
-│   ├── update.php
-│   └── delete.php
-├── public/
-│   └── style.css
-├── dashboard.php
-├── index.php
-├── /database/
-│   └── math_gineer_db.sql
-└── README.md
-
-------------------------------
-
-
----
+-----------------------------------------------------------------
 
 ### ✅ **3. Commit and Push**
 
