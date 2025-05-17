@@ -127,6 +127,12 @@ if ($user_row = $user_result->fetch_assoc()) {
             onclick="window.location.href='../crud/create.php'">
       + Create New Lecture
     </button>
+    <!-- Enroll Student -->
+    <button style="margin-left: 10px; margin-bottom: 15px; padding: 8px 16px; background-color: #1e90ff; color: white; border: none; border-radius: 4px; cursor: pointer;" 
+        onclick="window.location.href='../crud/enroll_student.php'">
+  📚 Enroll Student
+</button>
+
   <?php endif; ?>
 
   <table>
