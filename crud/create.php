@@ -2,32 +2,41 @@
 session_start();
 include '../config/db.php';
 
-// Check if user is admin
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+// Check if admin
+if (!isset($_SESSION['user_id'], $_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../index.php?page=login");
     exit;
 }
 
-$message = "";
+// Fetch courses for the dropdown
+$courses = $conn->query("SELECT id, title FROM courses");
 
-// Fetch courses for dropdown
-$courses_result = $conn->query("SELECT id, title FROM courses ORDER BY title ASC");
-
+// Handle form submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title']);
+    $description = trim($_POST['content']);
     $course_id = intval($_POST['course_id']);
-    $description = trim($_POST['description']);
 
-    if (empty($title) || empty($course_id)) {
-        $message = "Please fill in all required fields.";
+    // Basic validation
+    if ($title === '' || $course_id === 0) {
+        $message = "Please provide a lecture title and select a course.";
     } else {
-        $stmt = $conn->prepare("INSERT INTO lectures (title, course_id, description) VALUES (?, ?, ?)");
-        $stmt->bind_param("sis", $title, $course_id, $description);
-        if ($stmt->execute()) {
-            header("Location: dashboard.php?msg=Lecture created successfully");
-            exit;
+        // Prevent duplicate lecture titles for the same course
+        $check = $conn->prepare("SELECT * FROM lectures WHERE title = ? AND course_id = ?");
+        $check->bind_param("si", $title, $course_id);
+        $check->execute();
+        $checkResult = $check->get_result();
+
+        if ($checkResult->num_rows === 0) {
+            $stmt = $conn->prepare("INSERT INTO lectures (title, content, course_id) VALUES (?, ?, ?)");
+            $stmt->bind_param("ssi", $title, $description, $course_id);
+            if ($stmt->execute()) {
+                $message = "Lecture created successfully!";
+            } else {
+                $message = "Error creating lecture. Please try again.";
+            }
         } else {
-            $message = "Error creating lecture: " . $conn->error;
+            $message = "A lecture with this title already exists for the selected course.";
         }
     }
 }
@@ -36,243 +45,103 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>Create Lecture</title>
-    <script src="/js/script.js"></script>
-    <style>
-                /* Reset & base */
-        * {
-        box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <title>Create Lecture</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f4f6f8;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    label, input, select, textarea {
+      display: block;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    input, select, textarea {
+      padding: 8px;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      font-size: 1em;
+    }
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    button {
+      background-color: #2ed573;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px;
+      width: 100%;
+      cursor: pointer;
+      font-size: 1em;
+    }
 
-        body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f6f8;
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        }
-
-        h1 {
-        text-align: center;
-        font-weight: 700;
-        margin-bottom: 30px;
-        color: #222;
-        }
-
-        form {
-        background: #ffffff;
-        padding: 30px 40px;
-        max-width: 680px;
-        width: 100%;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        label {
-        display: block;
-        margin-bottom: 6px;
-        font-weight: 600;
-        color: #333;
-        font-size: 15px;
-        }
-
-        input[type="text"],
-        select,
-        textarea {
-        width: 100%;
-        padding: 12px 14px;
-        margin-bottom: 20px;
-        border-radius: 6px;
-        border: 1.5px solid #ccc;
-        font-size: 15px;
-        transition: border-color 0.3s ease;
-        font-family: inherit;
-        resize: vertical;
-        }
-
-        input[type="text"]:focus,
-        select:focus,
-        textarea:focus {
-        border-color: #2ed573;
-        outline: none;
-        }
-
-        button {
-        display: block;
-        width: 100%;
-        background-color: #2ed573;
+    .back-button {
+        background-color: #576574;
         color: white;
-        font-weight: 700;
         border: none;
-        padding: 14px;
-        border-radius: 8px;
-        font-size: 16px;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-family: Arial, sans-serif;
         cursor: pointer;
-        transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-        background-color: #27b760;
-        }
-
-        .message {
-        margin-bottom: 20px;
-        padding: 12px 15px;
-        border-radius: 6px;
-        font-weight: 600;
-        color: #fff;
-        background-color: #e74c3c;
-        text-align: center;
-        }
-
-        .message.success {
-        background-color: #2ed573;
-        }
-
-        /* Modal styles */
-        #courseModal {
-        display: none; /* Hidden by default */
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
-        justify-content: center;
-        align-items: center;
-        /* use flex only when visible */
-        }
-
-        #courseModal.active {
-        display: flex;
-        }
-
-        #courseModal > div {
-        background: #fff;
-        padding: 25px 30px;
-        border-radius: 10px;
-        width: 350px;
-        max-width: 90vw;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        position: relative;
-        font-family: inherit;
-        }
-
-        #courseModal h2 {
-        margin-top: 0;
-        margin-bottom: 20px;
-        font-weight: 700;
-        color: #222;
-        }
-
-        #addCourseForm label {
-        margin-bottom: 6px;
-        }
-
-        #addCourseForm input[type="text"] {
-        padding: 10px 12px;
-        font-size: 14px;
-        margin-bottom: 20px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
         width: 100%;
-        box-sizing: border-box;
-        }
-
-        #addCourseForm button {
-        padding: 10px 15px;
-        font-size: 14px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-weight: 700;
-        transition: background-color 0.3s ease;
-        }
-
-        #addCourseForm button[type="submit"] {
-        background-color: #2ed573;
-        color: white;
-        }
-
-        #addCourseForm button[type="submit"]:hover {
-        background-color: #27b760;
-        }
-
-        #addCourseForm #closeModal {
-        background-color: #ccc;
-        color: #333;
-        margin-left: 10px;
-        }
-
-        #addCourseForm #closeModal:hover {
-        background-color: #b3b3b3;
-        }
-
-        #modalMsg {
-        color: #e74c3c;
-        margin-top: 10px;
-        font-weight: 600;
-        display: none;
-        font-size: 13px;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 480px) {
-        form {
-            padding: 20px;
-        }
-
-        #courseModal > div {
-            width: 90vw;
-            padding: 20px;
-        }
-        }
+        font-size: 1em;
+        margin-top: 15px;
+    }
+    .back-button:hover {
+        background-color: #485460;
+    }
 
 
-    </style>
+    .message {
+      margin: 20px auto;
+      max-width: 400px;
+      text-align: center;
+      color: green;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Create New Lecture</h1>
+    <h2 style="text-align: center;">Create New Lecture</h2>
 
-<?php if ($message): ?>
-    <div class="message"><?= htmlspecialchars($message) ?></div>
-<?php endif; ?>
+    <?php if (!empty($message)): ?>
+    <p class="message"><?= htmlspecialchars($message) ?></p>
+    <?php endif; ?>
 
-<form method="POST" action="">
-    <label for="title">Lecture Title *</label>
+    <form method="POST" action="">
+    <label for="title">Lecture Title:</label>
     <input type="text" id="title" name="title" required />
 
-    <!-- Courses Dropdown -->
-        <label for="course_id">Course *</label>
-        <select id="course_id" name="course_id" required>
-            <option value="">Select course</option>
-            <?php while ($course = $courses_result->fetch_assoc()): ?>
-                <option value="<?= $course['id'] ?>"><?= htmlspecialchars($course['title']) ?></option>
-            <?php endwhile; ?>
-            <option value="add_new">+ Add new course</option>
-        </select>
+    <label for="content">Description:</label>
+    <textarea id="content" name="content"></textarea>
 
-        <!-- Modal Structure -->
-        <div id="courseModal" style="display:none; position: fixed; inset:0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content:center; align-items:center;">
-        <div style="background: white; padding: 25px; border-radius: 10px; width: 350px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
-            <h2 style="margin-top:0;">Add New Course</h2>
-            <form id="addCourseForm">
-            <label for="newCourseTitle">Course Title *</label>
-            <input type="text" id="newCourseTitle" name="title" required style="width:100%; padding:8px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px;"/>
-            <button type="submit" style="background:#2ed573; border:none; padding:10px 15px; color:white; border-radius:6px; cursor:pointer;">Create Course</button>
-            <button type="button" id="closeModal" style="margin-left:10px; padding:10px 15px; border:none; background:#ccc; border-radius:6px; cursor:pointer;">Cancel</button>
-            <p id="modalMsg" style="color:red; margin-top:10px; display:none;"></p>
-            </form>
-        </div>
-    </div>
-
-    <label for="description">Description</label>
-    <textarea id="description" name="description" rows="4"></textarea>
+    <label for="course_id">Select Course:</label>
+    <select id="course_id" name="course_id" required>
+        <option value="">-- Choose Course --</option>
+        <?php while ($course = $courses->fetch_assoc()): ?>
+        <option value="<?= $course['id'] ?>"><?= htmlspecialchars($course['title']) ?></option>
+        <?php endwhile; ?>
+    </select>
 
     <button type="submit">Create Lecture</button>
+
+    <button type="button" onclick="window.location.href='../dashboard.php'" class="back-button">
+    &larr; Back to Dashboard
+    </button>
+
+
 </form>
 
 </body>

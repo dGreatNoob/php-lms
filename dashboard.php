@@ -1,8 +1,6 @@
 <?php
-
-session_start();
-include '../config/db.php';
-
+  session_start();
+  include 'config/db.php';
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'], $_SESSION['role'])) {
     header("Location: ../index.php?page=login");
@@ -124,14 +122,15 @@ if ($user_row = $user_result->fetch_assoc()) {
   <?php if ($role === 'admin'): ?>
     <!-- Create lecture button -->
     <button style="margin-bottom: 15px; padding: 8px 16px; background-color: #2ed573; color: white; border: none; border-radius: 4px; cursor: pointer;" 
-            onclick="window.location.href='../crud/create.php'">
+        onclick="window.location.href='http://localhost:8000/crud/create.php'">
       + Create New Lecture
     </button>
-    <!-- Enroll Student -->
+
     <button style="margin-left: 10px; margin-bottom: 15px; padding: 8px 16px; background-color: #1e90ff; color: white; border: none; border-radius: 4px; cursor: pointer;" 
-        onclick="window.location.href='../crud/enroll_student.php'">
-  📚 Enroll Student
-</button>
+            onclick="window.location.href='http://localhost:8000/crud/enroll_student.php'">
+      📚 Enroll Student
+    </button>
+
 
   <?php endif; ?>
 

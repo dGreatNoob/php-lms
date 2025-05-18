@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_name'] = $user['name'];
 
             //  Redirect to the shared dashboard
-           header("Location: http://localhost/math_gineer/landing/dashboard.php");
+          header("Location: http://localhost:8000/dashboard.php");
 
             exit;
         } else {

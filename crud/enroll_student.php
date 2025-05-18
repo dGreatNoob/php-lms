@@ -70,6 +70,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       border-radius: 4px;
       margin-top: 10px;
     }
+
+    .back-button {
+        background-color: #576574;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-family: Arial, sans-serif;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1em;
+        margin-top: 15px;
+    }
+    .back-button:hover {
+        background-color: #485460;
+    }
+
     .message {
       margin: 20px auto;
       max-width: 400px;
@@ -104,6 +121,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </select>
 
   <button type="submit">Enroll Student</button>
+  <button type="button" onclick="window.location.href='../dashboard.php'" class="back-button">
+    &larr; Back to Dashboard
+  </button>
+
 </form>
 
 </body>

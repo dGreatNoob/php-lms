@@ -124,7 +124,7 @@ $courses = $conn->query("SELECT id, title FROM courses");
       </select>
 
       <button type="submit">Update Lecture</button>
-      <a href="../landing/dashboard.php">Cancel</a>
+      <a href="../dashboard.php">Cancel</a>
     </form>
   </div>
 </body>
