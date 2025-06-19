@@ -1,86 +1,144 @@
-/* style.css */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f8;
+/* CSS Variables for light/dark themes */
+:root {
+  --color-bg: #f4f4f5;
+  --color-bg-alt: #fff;
+  --color-text: #18181b;
+  --color-primary: #2563eb;
+  --color-border: #e4e4e7;
+  --color-error: #ef4444;
+  --color-success: #22c55e;
+  --color-muted: #71717a;
+}
+.theme-dark {
+  --color-bg: #18181b;
+  --color-bg-alt: #232326;
+  --color-text: #f4f4f5;
+  --color-primary: #60a5fa;
+  --color-border: #33334d;
+  --color-error: #f87171;
+  --color-success: #4ade80;
+  --color-muted: #a1a1aa;
+}
+html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
-  display: flex;
-  height: 100vh;
-  align-items: center;     /* vertical centering */
-  justify-content: center; /* horizontal centering */
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  transition: background 0.3s, color 0.3s;
 }
-
-
 .form-container {
-    align-items: center;
-}
-
-.container {
-  background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.1);
-  width: 100%;
   max-width: 400px;
+  margin: 40px auto;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  padding: 2rem 2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
-
-h2 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-form label {
-  display: block;
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 0.5rem;
-  margin-top: 1rem;
 }
-
-form input, form select {
-  width: 100%;
-  padding: 0.5rem;
-  margin-top: 0.3rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+.form-header h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
 }
-
-button {
-  margin-top: 1.5rem;
-  padding: 0.7rem;
-  width: 100%;
-  background-color: #007bff;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  font-weight: bold;
+#theme-toggle {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: 1.2rem;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
-
-button:hover {
-  background-color: #0056b3;
+#theme-toggle:focus {
+  outline: 2px solid var(--color-primary);
 }
-
-p {
-  margin-top: 1rem;
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+input, select, textarea {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: border 0.2s, background 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  background: var(--color-bg-alt);
+}
+button[type="submit"], button:not([id]) {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.07);
+}
+button[type="submit"]:hover, button:not([id]):hover {
+  background: #1d4ed8;
+}
+.alert {
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+.alert-error {
+  background: var(--color-error);
+  color: #fff;
+  border: 1px solid #b91c1c;
+}
+.alert-success {
+  background: var(--color-success);
+  color: #fff;
+  border: 1px solid #15803d;
+}
+.form-footer {
   text-align: center;
+  font-size: 0.97rem;
+  color: var(--color-muted);
 }
-a {
-  text-decoration: none;
-  color: #007bff;
-}
-a:hover {
+.form-footer a {
+  color: var(--color-primary);
   text-decoration: underline;
+  font-weight: 500;
 }
-
-.message {
-  text-align: center;
-  font-weight: bold;
-  margin-right: 10vh;
-}
-
-.message.success {
-  color: green;
-}
-
-.message.error {
-  color: red;
+@media (max-width: 600px) {
+  .form-container {
+    padding: 1.2rem 0.7rem 1rem 0.7rem;
+    max-width: 98vw;
+  }
+  .form-header h2 {
+    font-size: 1.3rem;
+  }
 }
