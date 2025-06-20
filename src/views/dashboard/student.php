@@ -154,8 +154,13 @@ if (!empty($lectures_by_topic) && !empty($user_id)) {
                                                 <?php if ($existing && ($existing['grade'] || $existing['feedback'])): ?>
                                                     <div class="alert alert--success mb-4">
                                                         <div class="alert__content">
-                                                            <strong>Feedback:</strong> 
-                                                            <?php if($existing['grade']) echo "Grade: ".htmlspecialchars($existing['grade']); ?>
+                                                            <strong>Feedback:</strong>
+                                                            <?php if($existing['grade']) {
+                                                                $grade = floatval($existing['grade']);
+                                                                $badgeClass = $grade < 75 ? 'badge--error' : 'badge--success';
+                                                                echo "<span class='badge $badgeClass ml-2'>Grade: ".htmlspecialchars($existing['grade'])."</span>";
+                                                            }
+                                                            ?>
                                                             <?= nl2br(htmlspecialchars($existing['feedback'])) ?>
                                                         </div>
                                                     </div>
