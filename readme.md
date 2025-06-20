@@ -203,3 +203,19 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Inter font family for typography
 - Modern CSS techniques and best practices
 - WCAG 2.1 guidelines for accessibility
+
+## 🌱 Seeding the Database with Demo Data
+
+After setting up the schema, you can import demo data (users, courses, topics, lectures, etc.) using the provided `database/seed.sql` file:
+
+### Command Line
+```sh
+mysql -u root -p php_lms < database/seed.sql
+```
+
+### phpMyAdmin
+1. Open your database in phpMyAdmin.
+2. Go to the **Import** tab.
+3. Select `database/seed.sql` and click **Go**.
+
+This will populate your LMS with the current demo data from your development environment.
