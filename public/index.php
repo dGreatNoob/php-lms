@@ -41,6 +41,9 @@ if ($page === 'admin' && $_SESSION['role'] === 'admin') {
         case 'enrollments':
             $controller = new EnrollmentController();
             break;
+        case 'submissions':
+            $controller = new SubmissionsController();
+            break;
         case 'archive':
             require_once __DIR__ . '/../src/controllers/DashboardController.php';
             $dashboard = new DashboardController();
@@ -79,10 +82,25 @@ if ($page === 'admin' && $_SESSION['role'] === 'admin') {
                 User::deletePermanent($id);
                 header('Location: ?page=admin&section=archive');
                 exit;
+            } elseif ($action === 'delete_all_archived') {
+                require_once __DIR__ . '/../src/models/Lecture.php';
+                require_once __DIR__ . '/../src/models/Topic.php';
+                require_once __DIR__ . '/../src/models/Course.php';
+                require_once __DIR__ . '/../src/models/User.php';
+                Lecture::deleteAllArchived();
+                Topic::deleteAllArchived();
+                Course::deleteAllArchived();
+                User::deleteAllArchived();
+                header('Location: ?page=admin&section=archive');
+                exit;
             } else {
                 $dashboard->archive();
                 exit;
             }
+        case 'profile':
+            require_once __DIR__ . '/../src/controllers/ProfileController.php';
+            (new ProfileController())->index();
+            break;
         default:
             (new DashboardController())->index();
             exit;
@@ -103,6 +121,10 @@ switch ($page) {
         break;
     case 'logout':
         (new AuthController())->logout();
+        break;
+    case 'profile':
+        require_once __DIR__ . '/../src/controllers/ProfileController.php';
+        (new ProfileController())->index();
         break;
     // Add more routes as needed
     default:

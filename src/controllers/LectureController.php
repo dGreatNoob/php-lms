@@ -167,40 +167,6 @@ class LectureController {
         $lectures = Lecture::all(1);
         include __DIR__ . '/../views/admin/lectures/archive.php';
     }
-    public function submissions($id = null) {
-        require_once __DIR__ . '/../models/Submission.php';
-        require_once __DIR__ . '/../models/Lecture.php';
-        require_once __DIR__ . '/../models/User.php';
-        require_once __DIR__ . '/../models/Activity.php';
-        if (!$id) {
-            header('Location: ?page=admin&section=lectures');
-            exit;
-        }
-        $lecture = Lecture::find($id);
-        $submissions = Submission::allForLectureWithStudent($id);
-        // Handle grading/feedback POST
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submission_id'])) {
-            $submission_id = intval($_POST['submission_id']);
-            $grade = trim($_POST['grade'] ?? '');
-            $feedback = trim($_POST['feedback'] ?? '');
-            $result = Submission::updateGradeAndFeedback($submission_id, $grade, $feedback);
-            
-            if ($result) {
-                // Log the grading activity
-                $user_id = $_SESSION['user_id'] ?? null;
-                $submission = Submission::find($submission_id);
-                if ($submission && $lecture) {
-                    $student = User::findById($submission['student_id']);
-                    $student_name = $student ? $student['first_name'] . ' ' . $student['last_name'] : 'Unknown Student';
-                    Activity::logSubmissionGraded($user_id, $submission_id, $student_name, $lecture['title']);
-                }
-            }
-            
-            // Refresh submissions after update
-            $submissions = Submission::allForLectureWithStudent($id);
-        }
-        include __DIR__ . '/../views/admin/lectures/submissions.php';
-    }
     private function handleUpload($file, $allowed_exts) {
         if ($file['error'] !== UPLOAD_ERR_OK) return false;
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));

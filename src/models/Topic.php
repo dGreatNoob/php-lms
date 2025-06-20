@@ -91,4 +91,9 @@ class Topic {
         $stmt->bind_param('i', $id);
         return $stmt->execute();
     }
+    public static function deleteAllArchived() {
+        global $conn;
+        $stmt = $conn->prepare('DELETE FROM topics WHERE archived = 1');
+        $stmt->execute();
+    }
 } 

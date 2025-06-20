@@ -59,4 +59,24 @@ class User {
         $stmt->bind_param('i', $id);
         return $stmt->execute();
     }
+    public static function allUnenrolledStudents() {
+        global $conn;
+        $sql = "SELECT * FROM users WHERE role = 'student' AND archived = 0 AND id NOT IN (SELECT student_id FROM enrollments)";
+        $result = $conn->query($sql);
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    }
+    public static function getPasswordById($id) {
+        global $conn;
+        $stmt = $conn->prepare('SELECT password FROM users WHERE id = ? AND archived = 0');
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row ? $row['password'] : null;
+    }
+    public static function deleteAllArchived() {
+        global $conn;
+        $stmt = $conn->prepare('DELETE FROM users WHERE archived = 1');
+        $stmt->execute();
+    }
 } 

@@ -49,4 +49,16 @@ class Submission {
         $result = $stmt->get_result();
         return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
+    
+    public static function allWithDetails() {
+        global $conn;
+        $sql = 'SELECT s.*, u.first_name, u.last_name, u.username, l.title AS lecture_title, l.due_date, t.title AS topic_title, t.parent_topic_id, c.title AS course_title, c.code AS course_code
+                FROM submissions s
+                JOIN users u ON s.student_id = u.id
+                JOIN lectures l ON s.lecture_id = l.id
+                JOIN topics t ON l.topic_id = t.id
+                JOIN courses c ON t.course_id = c.id';
+        $result = $conn->query($sql);
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    }
 } 

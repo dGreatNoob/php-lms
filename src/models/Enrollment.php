@@ -29,4 +29,14 @@ class Enrollment {
         $stmt->bind_param('i', $id);
         return $stmt->execute();
     }
+    
+    public static function getCoursesForStudent($student_id) {
+        global $conn;
+        $sql = 'SELECT c.code, c.title FROM enrollments e JOIN courses c ON e.course_id = c.id WHERE e.student_id = ?';
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    }
 } 

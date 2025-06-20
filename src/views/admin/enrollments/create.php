@@ -11,59 +11,7 @@
 </head>
 <body>
     <div class="dashboard">
-        <aside class="sidebar">
-            <div class="sidebar__header">
-                <h2 class="sidebar__title">LMS Admin</h2>
-            </div>
-            
-            <nav class="sidebar__nav">
-                <div class="sidebar__section">
-                    <h3 class="sidebar__section-title">Navigation</h3>
-                    <a href="?page=admin" class="sidebar__link">
-                        <span>🏠</span>
-                        <span>Dashboard</span>
-                    </a>
-                </div>
-                
-                <div class="sidebar__section">
-                    <h3 class="sidebar__section-title">Management</h3>
-                    <a href="?page=admin&section=courses" class="sidebar__link">
-                        <span>📚</span>
-                        <span>Courses</span>
-                    </a>
-                    <a href="?page=admin&section=topics" class="sidebar__link">
-                        <span>📋</span>
-                        <span>Topics & Subtopics</span>
-                    </a>
-                    <a href="?page=admin&section=lectures" class="sidebar__link">
-                        <span>🎓</span>
-                        <span>Lectures</span>
-                    </a>
-                    <a href="?page=admin&section=enrollments" class="sidebar__link sidebar__link--active">
-                        <span>👥</span>
-                        <span>Enrollments</span>
-                    </a>
-                </div>
-                
-                <div class="sidebar__section">
-                    <h3 class="sidebar__section-title">System</h3>
-                    <a href="?page=admin&section=archive" class="sidebar__link">
-                        <span>🗄️</span>
-                        <span>Archive/Restore</span>
-                    </a>
-                    <a href="?page=logout" class="sidebar__link sidebar__link--logout">
-                        <span>🚪</span>
-                        <span>Logout</span>
-                    </a>
-                </div>
-                
-                <div class="sidebar__section">
-                    <button class="btn btn--icon btn--secondary" data-theme-toggle aria-label="Toggle dark mode">
-                        🌙
-                    </button>
-                </div>
-            </nav>
-        </aside>
+        <?php include __DIR__ . '/../sidebar.php'; ?>
 
         <main class="dashboard__main" id="main-content">
             <header class="dashboard__header">
@@ -91,6 +39,17 @@
                             <?php endif; ?>
 
                             <form method="POST" action="?page=admin&section=enrollments&action=create" class="form" data-validate>
+                                <?php if (!empty($quick_student)): ?>
+                                <div class="form__group">
+                                    <label class="form__label">Student</label>
+                                    <div class="card mb-4 p-4" style="background: var(--color-bg-tertiary);">
+                                        <div class="font-semibold mb-2"><?= htmlspecialchars($quick_student['first_name'] . ' ' . $quick_student['last_name']) ?></div>
+                                        <div class="mb-1"><span class="badge badge--info">Username</span> <?= htmlspecialchars($quick_student['username']) ?></div>
+                                        <div><span class="badge badge--muted">Email</span> <?= htmlspecialchars($quick_student['email']) ?></div>
+                                    </div>
+                                    <input type="hidden" name="student_id" value="<?= $quick_student['id'] ?>">
+                                </div>
+                                <?php else: ?>
                                 <div class="form__group">
                                     <label for="student_id" class="form__label form__label--required">
                                         Student
@@ -105,7 +64,7 @@
                                         Choose the student to enroll
                                     </div>
                                 </div>
-
+                                <?php endif; ?>
                                 <div class="form__group">
                                     <label for="course_id" class="form__label form__label--required">
                                         Course
@@ -120,7 +79,6 @@
                                         Choose the course to enroll the student in
                                     </div>
                                 </div>
-
                                 <div class="flex flex--gap-4">
                                     <button type="submit" class="btn btn--primary">
                                         <span>✅</span>

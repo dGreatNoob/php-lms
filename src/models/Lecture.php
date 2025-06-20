@@ -100,4 +100,9 @@ class Lecture {
         $result = $conn->query($sql);
         return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
+    public static function deleteAllArchived() {
+        global $conn;
+        $stmt = $conn->prepare('DELETE FROM lectures WHERE archived = 1');
+        $stmt->execute();
+    }
 } 

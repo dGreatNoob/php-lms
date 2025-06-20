@@ -47,7 +47,6 @@
                         aria-describedby="username-help"
                     >
                     <div id="username-help" class="form__help-text">
-                        Enter the username you registered with
                     </div>
                 </div>
 
@@ -76,7 +75,6 @@
                         </button>
                     </div>
                     <div id="password-help" class="form__help-text">
-                        Enter your password
                     </div>
                 </div>
 

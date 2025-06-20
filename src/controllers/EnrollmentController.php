@@ -2,7 +2,9 @@
 class EnrollmentController {
     public function index() {
         require_once __DIR__ . '/../models/Enrollment.php';
+        require_once __DIR__ . '/../models/User.php';
         $enrollments = Enrollment::all();
+        $unenrolled_students = User::allUnenrolledStudents();
         include __DIR__ . '/../views/admin/enrollments/index.php';
     }
     public function create() {
@@ -12,11 +14,40 @@ class EnrollmentController {
         require_once __DIR__ . '/../models/Activity.php';
         global $conn;
         $error = '';
+        $quick_student = null;
+        $quick_student_id = isset($_GET['student_id']) ? intval($_GET['student_id']) : 0;
+        if ($quick_student_id) {
+            $quick_student = User::findById($quick_student_id);
+        }
         // Fetch students (role=student)
         $students = [];
         $res = $conn->query("SELECT id, first_name, last_name, username FROM users WHERE role = 'student'");
         if ($res) $students = $res->fetch_all(MYSQLI_ASSOC);
         $courses = Course::all();
+        if (isset($_POST['view_student_password']) && isset($_POST['student_id']) && isset($_POST['admin_password'])) {
+            // Handle AJAX password view
+            session_start();
+            $admin_id = $_SESSION['user_id'] ?? null;
+            $student_id = intval($_POST['student_id']);
+            $admin_password = $_POST['admin_password'];
+            $response = ['success' => false, 'message' => 'Invalid request'];
+            if ($admin_id) {
+                $admin = User::findById($admin_id);
+                if ($admin && $admin['role'] === 'admin' && password_verify($admin_password, $admin['password'])) {
+                    $student_password = User::getPasswordById($student_id);
+                    if ($student_password) {
+                        $response = ['success' => true, 'password' => $student_password];
+                    } else {
+                        $response = ['success' => false, 'message' => 'Student not found or no password'];
+                    }
+                } else {
+                    $response = ['success' => false, 'message' => 'Admin password incorrect'];
+                }
+            }
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            exit;
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $student_id = intval($_POST['student_id'] ?? 0);
             $course_id = intval($_POST['course_id'] ?? 0);
@@ -28,15 +59,12 @@ class EnrollmentController {
                     // Log the enrollment activity
                     $user_id = $_SESSION['user_id'] ?? null;
                     $enrollment_id = $conn->insert_id;
-                    
                     $student = User::findById($student_id);
                     $course = Course::find($course_id);
-                    
                     if ($student && $course) {
                         $student_name = $student['first_name'] . ' ' . $student['last_name'];
                         Activity::logEnrollmentCreated($user_id, $enrollment_id, $student_name, $course['title']);
                     }
-                    
                     header('Location: ?page=admin&section=enrollments');
                     exit;
                 } else {

@@ -11,59 +11,7 @@
 </head>
 <body>
     <div class="dashboard">
-        <aside class="sidebar">
-            <div class="sidebar__header">
-                <h2 class="sidebar__title">LMS Admin</h2>
-            </div>
-            
-            <nav class="sidebar__nav">
-                <div class="sidebar__section">
-                    <h3 class="sidebar__section-title">Navigation</h3>
-                    <a href="?page=admin" class="sidebar__link">
-                        <span>🏠</span>
-                        <span>Dashboard</span>
-                    </a>
-                </div>
-                
-                <div class="sidebar__section">
-                    <h3 class="sidebar__section-title">Management</h3>
-                    <a href="?page=admin&section=courses" class="sidebar__link">
-                        <span>📚</span>
-                        <span>Courses</span>
-                    </a>
-                    <a href="?page=admin&section=topics" class="sidebar__link">
-                        <span>📋</span>
-                        <span>Topics & Subtopics</span>
-                    </a>
-                    <a href="?page=admin&section=lectures" class="sidebar__link">
-                        <span>🎓</span>
-                        <span>Lectures</span>
-                    </a>
-                    <a href="?page=admin&section=enrollments" class="sidebar__link">
-                        <span>👥</span>
-                        <span>Enrollments</span>
-                    </a>
-                </div>
-                
-                <div class="sidebar__section">
-                    <h3 class="sidebar__section-title">System</h3>
-                    <a href="?page=admin&section=archive" class="sidebar__link sidebar__link--active">
-                        <span>🗄️</span>
-                        <span>Archive/Restore</span>
-                    </a>
-                    <a href="?page=logout" class="sidebar__link sidebar__link--logout">
-                        <span>🚪</span>
-                        <span>Logout</span>
-                    </a>
-                </div>
-                
-                <div class="sidebar__section">
-                    <button class="btn btn--icon btn--secondary" data-theme-toggle aria-label="Toggle dark mode">
-                        🌙
-                    </button>
-                </div>
-            </nav>
-        </aside>
+        <?php include __DIR__ . '/../sidebar.php'; ?>
 
         <main class="dashboard__main" id="main-content">
             <header class="dashboard__header">
@@ -90,6 +38,7 @@
                                         <option value="users">Users</option>
                                     </select>
                                     <input type="text" id="archive-search" class="form__input" placeholder="Search archived items...">
+                                    <button type="button" class="btn btn--danger" id="delete-all-archived-btn">Delete All Archived</button>
                                 </div>
                             </div>
                         </div>
@@ -234,6 +183,29 @@
         </main>
     </div>
 
+    <!-- Delete All Confirmation Modal -->
+    <div class="modal-backdrop" id="delete-all-modal" style="display: none;">
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title">Delete All Archived Items</h3>
+                <button class="modal__close" data-modal-close="#delete-all-modal">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div class="alert alert--error">
+                    <span class="alert__icon">⚠️</span>
+                    <div class="alert__content">
+                        <div class="alert__title">Are you sure?</div>
+                        <div class="alert__message">This will permanently delete <strong>all archived lectures, topics, courses, and users</strong>. This action cannot be undone.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" data-modal-close="#delete-all-modal">Cancel</button>
+                <a href="?page=admin&section=archive&action=delete_all_archived" class="btn btn--danger">Delete All</a>
+            </div>
+        </div>
+    </div>
+
     <script src="js/script.js"></script>
     <script>
     // Helper to get URL parameter
@@ -303,6 +275,15 @@
         }
         updateActionLinks();
         typeSelect.addEventListener('change', updateActionLinks);
+    });
+
+    document.getElementById('delete-all-archived-btn').addEventListener('click', function() {
+        document.getElementById('delete-all-modal').style.display = 'flex';
+    });
+    document.querySelectorAll('[data-modal-close="#delete-all-modal"]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('delete-all-modal').style.display = 'none';
+        });
     });
     </script>
 </body>
