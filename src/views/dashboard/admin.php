@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - LMS</title>
-    <link rel="stylesheet" href="../public/css/style.css">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,6 +17,14 @@
             </div>
             
             <nav class="sidebar__nav">
+                <div class="sidebar__section">
+                    <h3 class="sidebar__section-title">Navigation</h3>
+                    <a href="?page=admin" class="sidebar__link sidebar__link--active">
+                        <span>🏠</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                
                 <div class="sidebar__section">
                     <h3 class="sidebar__section-title">Management</h3>
                     <a href="?page=admin&section=courses" class="sidebar__link">
@@ -118,38 +126,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
-                    <div class="card mb-6">
-                        <div class="card__header">
-                            <h2 class="card__title">Quick Actions</h2>
-                            <p class="card__subtitle">Common administrative tasks</p>
-                        </div>
-                        <div class="card__body">
-                            <div class="grid grid--cols-1 grid--cols-sm-2 grid--cols-md-3 grid--cols-lg-5">
-                                <a href="?page=admin&section=courses" class="btn btn--primary">
-                                    <span>📚</span>
-                                    <span>Manage Courses</span>
-                                </a>
-                                <a href="?page=admin&section=topics" class="btn btn--secondary">
-                                    <span>📋</span>
-                                    <span>Manage Topics</span>
-                                </a>
-                                <a href="?page=admin&section=lectures" class="btn btn--secondary">
-                                    <span>🎓</span>
-                                    <span>Manage Lectures</span>
-                                </a>
-                                <a href="?page=admin&section=enrollments" class="btn btn--secondary">
-                                    <span>👥</span>
-                                    <span>Manage Enrollments</span>
-                                </a>
-                                <a href="?page=admin&section=archive" class="btn btn--secondary">
-                                    <span>🗄️</span>
-                                    <span>Archive/Restore</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Recent Activity -->
                     <div class="card">
                         <div class="card__header">
@@ -192,6 +168,6 @@
         </main>
     </div>
 
-    <script src="../public/js/theme.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html> 

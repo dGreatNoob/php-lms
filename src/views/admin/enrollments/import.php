@@ -1,41 +1,192 @@
-<h1>Import Enrollments from CSV</h1>
-<?php if (!empty($error)): ?><p style="color:red;"> <?= htmlspecialchars($error) ?> </p><?php endif; ?>
-<form method="POST" enctype="multipart/form-data">
-    <label>CSV File: <input type="file" name="csv" accept=".csv" required></label><br>
-    <button type="submit">Import</button>
-</form>
-<p>CSV columns: <code>first_name,last_name,username,email,password,course_code</code></p>
-<p>Example row: <code>John,Doe,johndoe,john@example.com,secret,MPE101</code></p>
-<a href="?page=admin&section=enrollments">Back to Enrollments</a>
-<?php if (!empty($results)): ?>
-    <h2>Import Results</h2>
-    <table border="1" cellpadding="6" cellspacing="0">
-        <tr>
-            <th>Row</th>
-            <th>Status</th>
-        </tr>
-        <?php foreach ($results as $res): ?>
-        <tr style="color:<?= $res['success'] ? 'green' : 'red' ?>;">
-            <td><?= htmlspecialchars(implode(', ', $res['row'])) ?></td>
-            <td><?= htmlspecialchars($res['status']) ?></td>
-        </tr>
-        <?php endforeach; ?>
-    </table>
-<?php endif; ?>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Enrollments - LMS</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar__header">
+                <h2 class="sidebar__title">LMS Admin</h2>
+            </div>
+            
+            <nav class="sidebar__nav">
+                <div class="sidebar__section">
+                    <h3 class="sidebar__section-title">Navigation</h3>
+                    <a href="?page=admin" class="sidebar__link">
+                        <span>🏠</span>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar__section">
+                    <h3 class="sidebar__section-title">Management</h3>
+                    <a href="?page=admin&section=courses" class="sidebar__link">
+                        <span>📚</span>
+                        <span>Courses</span>
+                    </a>
+                    <a href="?page=admin&section=topics" class="sidebar__link">
+                        <span>📋</span>
+                        <span>Topics & Subtopics</span>
+                    </a>
+                    <a href="?page=admin&section=lectures" class="sidebar__link">
+                        <span>🎓</span>
+                        <span>Lectures</span>
+                    </a>
+                    <a href="?page=admin&section=enrollments" class="sidebar__link sidebar__link--active">
+                        <span>👥</span>
+                        <span>Enrollments</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar__section">
+                    <h3 class="sidebar__section-title">System</h3>
+                    <a href="?page=admin&section=archive" class="sidebar__link">
+                        <span>🗄️</span>
+                        <span>Archive/Restore</span>
+                    </a>
+                    <a href="?page=logout" class="sidebar__link sidebar__link--logout">
+                        <span>🚪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar__section">
+                    <button class="btn btn--icon btn--secondary" data-theme-toggle aria-label="Toggle dark mode">
+                        🌙
+                    </button>
+                </div>
+            </nav>
+        </aside>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.expand-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const parentRow = this.closest('tr');
-            const parentRowId = parentRow.getAttribute('data-rowid');
-            const childRows = document.querySelectorAll('.parent-' + parentRowId);
-            const expanded = this.textContent === '-';
-            childRows.forEach(row => {
-                row.style.display = expanded ? 'none' : '';
-            });
-            this.textContent = expanded ? '+' : '-';
-        });
-    });
-});
-</script> 
+        <main class="dashboard__main" id="main-content">
+            <header class="dashboard__header">
+                <div class="container">
+                    <h1 class="dashboard__title">Import Enrollments</h1>
+                    <p class="dashboard__subtitle">Bulk import student enrollments from CSV file</p>
+                </div>
+            </header>
+
+            <div class="dashboard__content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card__header">
+                            <h2 class="card__title">CSV Import</h2>
+                            <p class="card__subtitle">Upload a CSV file to import multiple enrollments</p>
+                        </div>
+                        <div class="card__body">
+                            <?php if (!empty($error)): ?>
+                                <div class="alert alert--error" role="alert">
+                                    <span class="alert__icon">⚠️</span>
+                                    <div class="alert__content">
+                                        <div class="alert__message"><?= htmlspecialchars($error) ?></div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <form method="POST" enctype="multipart/form-data" class="form" data-validate>
+                                <div class="form__group">
+                                    <label for="csv" class="form__label form__label--required">
+                                        CSV File
+                                    </label>
+                                    <input 
+                                        type="file" 
+                                        id="csv"
+                                        name="csv" 
+                                        class="form__input" 
+                                        accept=".csv" 
+                                        required
+                                    >
+                                    <div class="form__help-text">
+                                        Select a CSV file with enrollment data
+                                    </div>
+                                </div>
+
+                                <div class="flex flex--gap-4">
+                                    <button type="submit" class="btn btn--primary">
+                                        <span>📤</span>
+                                        <span>Import Enrollments</span>
+                                    </button>
+                                    <a href="?page=admin&section=enrollments" class="btn btn--secondary">
+                                        <span>↩️</span>
+                                        <span>Cancel</span>
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card__header">
+                            <h2 class="card__title">CSV Format Requirements</h2>
+                        </div>
+                        <div class="card__body">
+                            <div class="alert alert--info" role="alert">
+                                <span class="alert__icon">ℹ️</span>
+                                <div class="alert__content">
+                                    <div class="alert__message">
+                                        <strong>Required columns:</strong> <code>first_name,last_name,username,email,password,course_code</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form__group">
+                                <label class="form__label">Example CSV Row:</label>
+                                <div class="bg-gray-100 p-3 rounded font-mono text-sm">
+                                    <code>John,Doe,johndoe,john@example.com,secret,MPE101</code>
+                                </div>
+                                <div class="form__help-text">
+                                    Each row should contain student information and the course code they should be enrolled in
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <?php if (!empty($results)): ?>
+                        <div class="card">
+                            <div class="card__header">
+                                <h2 class="card__title">Import Results</h2>
+                                <p class="card__subtitle">Summary of the import process</p>
+                            </div>
+                            <div class="card__body">
+                                <div class="table-container">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Row Data</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($results as $res): ?>
+                                            <tr class="<?= $res['success'] ? 'table__row--success' : 'table__row--error' ?>">
+                                                <td>
+                                                    <code><?= htmlspecialchars(implode(', ', $res['row'])) ?></code>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge--<?= $res['success'] ? 'success' : 'error' ?>">
+                                                        <?= htmlspecialchars($res['status']) ?>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html> 
