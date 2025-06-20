@@ -149,6 +149,9 @@
                                                         <a href="?page=admin&section=enrollments&action=create&student_id=<?= $student['id'] ?>" class="btn btn--sm btn--primary" data-tooltip="Quick Enroll">
                                                             <span class="sr-only">Quick Enroll</span>➕
                                                         </a>
+                                                        <button type="button" class="btn btn--sm btn--danger js-delete-user-trigger" data-user-id="<?= $student['id'] ?>" data-user-name="<?= htmlspecialchars($student['first_name'] . ' ' . $student['last_name']) ?>" data-tooltip="Delete User">
+                                                            <span class="sr-only">Delete User</span>🗑️
+                                                        </button>
                                                     </td>
                                                 </tr>
                                                 <?php endforeach; ?>
@@ -183,6 +186,29 @@
             <div class="modal__footer">
                 <button class="btn btn--secondary" data-modal-close="#delete-modal">Cancel</button>
                 <a href="#" id="confirm-delete-btn" class="btn btn--danger">Unenroll</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-backdrop" id="delete-user-modal" style="display: none;">
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title">Confirm Delete User</h3>
+                <button class="modal__close" data-modal-close="#delete-user-modal">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div class="alert alert--error">
+                    <span class="alert__icon">⚠️</span>
+                    <div class="alert__content">
+                        <div class="alert__title">Delete this user?</div>
+                        <div class="alert__message" id="delete-user-modal-warning-message">Are you sure you want to permanently delete this user? This action cannot be undone.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" data-modal-close="#delete-user-modal">Cancel</button>
+                <a href="#" id="confirm-delete-user-btn" class="btn btn--danger">Delete</a>
             </div>
         </div>
     </div>
@@ -230,6 +256,22 @@
     document.querySelectorAll('[data-modal-close="#delete-modal"]').forEach(btn => {
         btn.addEventListener('click', function() {
             deleteModal.style.display = 'none';
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.js-delete-user-trigger').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var userId = btn.getAttribute('data-user-id');
+                var userName = btn.getAttribute('data-user-name');
+                document.getElementById('delete-user-modal-warning-message').innerHTML = 'Are you sure you want to permanently delete <strong>' + userName + '</strong>? This action cannot be undone.';
+                document.getElementById('confirm-delete-user-btn').setAttribute('href', '?page=admin&section=enrollments&action=delete_user&id=' + userId);
+                document.getElementById('delete-user-modal').style.display = 'flex';
+            });
+        });
+        document.querySelectorAll('[data-modal-close="#delete-user-modal"]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.getElementById('delete-user-modal').style.display = 'none';
+            });
         });
     });
     </script>

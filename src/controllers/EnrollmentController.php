@@ -158,4 +158,12 @@ class EnrollmentController {
         }
         include __DIR__ . '/../views/admin/enrollments/import.php';
     }
+    public function delete_user($id = null) {
+        require_once __DIR__ . '/../models/User.php';
+        if ($id) {
+            User::deletePermanent($id);
+        }
+        header('Location: ?page=admin&section=enrollments');
+        exit;
+    }
 } 

@@ -35,7 +35,6 @@
                                         <option value="lectures">Lectures</option>
                                         <option value="topics">Topics</option>
                                         <option value="courses">Courses</option>
-                                        <option value="users">Users</option>
                                     </select>
                                     <input type="text" id="archive-search" class="form__input" placeholder="Search archived items...">
                                     <button type="button" class="btn btn--danger" id="delete-all-archived-btn">Delete All Archived</button>
@@ -140,42 +139,6 @@
                                     </table>
                                 </div>
                             </div>
-
-                            <!-- Archived Users -->
-                            <div id="archive-users" class="archive-table" style="display:none;">
-                                <h3 class="mb-2">Archived Users</h3>
-                                <div class="table-container">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Full Name</th>
-                                                <th>Username</th>
-                                                <th>Email</th>
-                                                <th>Role</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php if (empty($archived_users)): ?>
-                                                <tr><td colspan="5" class="text-center text-muted">No archived users found.</td></tr>
-                                            <?php else: foreach ($archived_users as $item): ?>
-                                            <tr>
-                                                <td><div class="font-medium"><?= htmlspecialchars($item['first_name'] . ' ' . $item['last_name']) ?></div></td>
-                                                <td><span class="badge badge--info"><?= htmlspecialchars($item['username']) ?></span></td>
-                                                <td><?= htmlspecialchars($item['email']) ?></td>
-                                                <td><span class="badge badge--primary"><?= htmlspecialchars($item['role']) ?></span></td>
-                                                <td>
-                                                    <div class="flex flex--gap-2">
-                                                        <a href="?page=admin&section=archive&action=restore_user&id=<?= $item['id'] ?>" class="btn btn--sm btn--success" data-tooltip="Restore user">🔄 Restore</a>
-                                                        <a href="?page=admin&section=archive&action=delete_permanent_user&id=<?= $item['id'] ?>" class="btn btn--sm btn--danger" onclick="return confirm('Permanently delete this user? This cannot be undone.')" data-tooltip="Delete permanently">🗑️ Delete Permanently</a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <?php endforeach; endif; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -220,8 +183,7 @@
         const tables = {
             lectures: document.getElementById('archive-lectures'),
             topics: document.getElementById('archive-topics'),
-            courses: document.getElementById('archive-courses'),
-            users: document.getElementById('archive-users')
+            courses: document.getElementById('archive-courses')
         };
 
         // Set initial filter from URL param if present

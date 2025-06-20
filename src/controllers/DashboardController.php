@@ -47,7 +47,7 @@ class DashboardController {
             ];
             
             // Fetch recent activity
-            $recent_activity = Activity::getFormattedRecent(15);
+            $recent_activity = Activity::getFormattedRecent(50);
             
             include __DIR__ . '/../views/dashboard/admin.php';
         } else {
