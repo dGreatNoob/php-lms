@@ -1,5 +1,70 @@
 # PHP-LMS (Learning Management System)
 
+## 🪟 Windows Installation & Setup
+
+### 1. Install Prerequisites
+- **PHP 7.4+**: [Download PHP for Windows](https://windows.php.net/download/)
+- **MySQL 5.7+** or **MariaDB 10.2+**: [Download MySQL](https://dev.mysql.com/downloads/installer/) or [Download MariaDB](https://mariadb.org/download/)
+- **Web Server**: [XAMPP](https://www.apachefriends.org/index.html) (includes Apache, PHP, MySQL) is recommended for beginners.
+
+### 2. Clone the Repository
+```sh
+git clone <your-repo-url>
+cd php-lms
+```
+
+### 3. Set Up the Database
+- Open **XAMPP Control Panel** and start **Apache** and **MySQL**.
+- Open **phpMyAdmin** (usually at http://localhost/phpmyadmin).
+- Create a new database, e.g., `php_lms`.
+- Import the schema:
+  - Click the database name.
+  - Go to the **Import** tab.
+  - Choose `database/schema.sql` and click **Go**.
+
+### 4. Configure Environment Variables
+Create a file named `.env` in the project root with the following content:
+```
+DB_HOST=localhost
+DB_NAME=php_lms
+DB_USER=root
+DB_PASS=
+```
+- Adjust `DB_USER` and `DB_PASS` if your MySQL setup uses a different username or password.
+
+### 5. Set Permissions for Uploads
+- In Windows, right-click the `public/uploads` folder, go to **Properties > Security**, and ensure your web server user (e.g., `www-data` or `IIS_IUSRS`) has **write** permission.
+
+### 6. Run the Application
+- Place the project folder inside your XAMPP `htdocs` directory (e.g., `C:\xampp\htdocs\php-lms`).
+- Access the app at: [http://localhost/php-lms/public/](http://localhost/php-lms/public/)
+
+---
+
+## 🚀 Quick Start Commands (Linux/macOS/WSL)
+
+```sh
+# Clone the repository
+git clone <your-repo-url>
+cd php-lms
+
+# Set up the database (replace credentials as needed)
+mysql -u root -p < database/schema.sql
+
+# Create .env file with your DB credentials
+echo "DB_HOST=localhost\nDB_NAME=php_lms\nDB_USER=root\nDB_PASS=" > .env
+
+# Set permissions for uploads (Linux/macOS)
+chmod 755 public/uploads/
+
+# Start your web server and access the app
+# Example for PHP built-in server (for testing only):
+php -S localhost:8000 -t public
+# Then visit http://localhost:8000/
+```
+
+---
+
 A modern, secure, and accessible Learning Management System built with vanilla PHP, MySQL, HTML, CSS, and JavaScript. Features a clean, responsive design system with WCAG 2.1 AA compliance.
 
 ## ✨ Features
@@ -64,47 +129,6 @@ php-lms/
 ├── .env.example           # Environment configuration template
 └── README.md
 ```
-
-## 🚀 Quick Start
-
-### 1. Prerequisites
-- PHP 7.4+ with MySQL extension
-- MySQL 5.7+ or MariaDB 10.2+
-- Web server (Apache/Nginx)
-
-### 2. Installation
-
-```bash
-# Clone the repository
-git clone <your-repo-url>
-cd php-lms
-
-# Set up database
-mysql -u root -p < database/schema.sql
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your database credentials
-
-# Set permissions
-chmod 755 public/uploads/
-```
-
-### 3. Configuration
-
-Create a `.env` file with your database settings:
-
-```env
-DB_HOST=localhost
-DB_NAME=lms_database
-DB_USER=your_username
-DB_PASS=your_password
-```
-
-### 4. Access the Application
-
-- **Development**: `http://localhost/php-lms/public/`
-- **Production**: Configure your web server to point to the `public/` directory
 
 ## 🎨 Design System
 
