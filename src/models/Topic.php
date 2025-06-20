@@ -87,6 +87,16 @@ class Topic {
     }
     public static function deletePermanent($id) {
         global $conn;
+        // Delete all lectures under this topic (and their submissions)
+        $lecture_stmt = $conn->prepare('SELECT id FROM lectures WHERE topic_id = ?');
+        $lecture_stmt->bind_param('i', $id);
+        $lecture_stmt->execute();
+        $lecture_result = $lecture_stmt->get_result();
+        require_once __DIR__ . '/Lecture.php';
+        while ($row = $lecture_result->fetch_assoc()) {
+            Lecture::deletePermanent($row['id']);
+        }
+        // Now delete the topic
         $stmt = $conn->prepare('DELETE FROM topics WHERE id = ?');
         $stmt->bind_param('i', $id);
         return $stmt->execute();
