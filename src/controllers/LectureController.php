@@ -2,52 +2,67 @@
 class LectureController {
     public function index() {
         require_once __DIR__ . '/../models/Lecture.php';
+        require_once __DIR__ . '/../models/Course.php';
         require_once __DIR__ . '/../models/Topic.php';
-        $lectures = Lecture::all(0);
+
+        $course_id = isset($_GET['course_id']) && !empty($_GET['course_id']) ? intval($_GET['course_id']) : null;
+        $topic_id = isset($_GET['topic_id']) && !empty($_GET['topic_id']) ? intval($_GET['topic_id']) : null;
+
+        $lectures = Lecture::all($course_id, $topic_id);
+        $courses = Course::all();
+        $topics = Topic::all(); 
+
         include __DIR__ . '/../views/admin/lectures/index.php';
     }
     public function create() {
-        require_once __DIR__ . '/../models/Lecture.php';
         require_once __DIR__ . '/../models/Topic.php';
+        require_once __DIR__ . '/../models/Course.php';
+        require_once __DIR__ . '/../models/Lecture.php';
+        require_once __DIR__ . '/../models/Activity.php';
+
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $topic_id = intval($_POST['topic_id'] ?? 0);
-            $title = trim($_POST['title'] ?? '');
-            $content = trim($_POST['content'] ?? '');
-            $file_path = null;
-            $image_path = null;
-            $requires_submission = !empty($_POST['requires_submission']) ? 1 : 0;
-            $submission_type = $_POST['submission_type'] ?? 'file';
-            $submission_instructions = trim($_POST['submission_instructions'] ?? '');
+            $topic_id = $_POST['topic_id'];
+            $title = $_POST['title'];
+            $content = $_POST['content'];
+            $allow_submissions = isset($_POST['allow_submissions']) ? 1 : 0;
             $due_date = !empty($_POST['due_date']) ? $_POST['due_date'] : null;
+
             // Handle file upload
-            if (!empty($_FILES['file']['name'])) {
-                $file_path = $this->handleUpload($_FILES['file'], ['pdf','doc','docx','txt','zip']);
-                if ($file_path === false) $error = 'Invalid file upload.';
-            }
-            // Handle image upload
-            if (!empty($_FILES['image']['name'])) {
-                $image_path = $this->handleUpload($_FILES['image'], ['jpg','jpeg','png','gif','webp']);
-                if ($image_path === false) $error = 'Invalid image upload.';
-            }
-            if (!$topic_id || !$title) {
-                $error = 'Topic and title are required.';
-            } elseif (!$error) {
-                $result = Lecture::create($topic_id, $title, $content, $file_path, $image_path, $requires_submission, $submission_type, $submission_instructions, $due_date);
-                if ($result) {
-                    header('Location: ?page=admin&section=lectures');
-                    exit;
-                } else {
-                    $error = 'Failed to create lecture.';
+            $attachment_path = null;
+            if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] == 0) {
+                $upload_dir = 'uploads/';
+                $file_name = uniqid('upload_') . '.' . pathinfo($_FILES['attachment']['name'], PATHINFO_EXTENSION);
+                $attachment_path = $upload_dir . $file_name;
+                if (!move_uploaded_file($_FILES['attachment']['tmp_name'], $attachment_path)) {
+                    $error = 'Failed to upload attachment.';
+                    $attachment_path = null;
                 }
             }
+
+            if (empty($error) && Lecture::create($topic_id, $title, $content, $attachment_path, $allow_submissions, $due_date)) {
+                Activity::log(
+                    $_SESSION['user_id'],
+                    'create',
+                    'lecture',
+                    $conn->insert_id,
+                    "Created lecture: " . $title
+                );
+                header('Location: ?page=admin&section=lectures');
+                exit;
+            } else {
+                $error = $error ?: 'Failed to create lecture.';
+            }
         }
+
         $topics = Topic::all();
+        $courses = Course::all();
         include __DIR__ . '/../views/admin/lectures/create.php';
     }
     public function edit($id = null) {
         require_once __DIR__ . '/../models/Lecture.php';
         require_once __DIR__ . '/../models/Topic.php';
+        require_once __DIR__ . '/../models/Activity.php';
         $error = '';
         $lecture = Lecture::find($id);
         if (!$lecture) {
@@ -98,6 +113,10 @@ class LectureController {
             } elseif (!$error) {
                 $result = Lecture::update($id, $topic_id, $title, $content, $file_path, $image_path, $requires_submission, $submission_type, $submission_instructions, $due_date);
                 if ($result) {
+                    // Log the activity
+                    $user_id = $_SESSION['user_id'] ?? null;
+                    Activity::logLectureUpdated($user_id, $id, $title);
+                    
                     header('Location: ?page=admin&section=lectures');
                     exit;
                 } else {
@@ -110,24 +129,51 @@ class LectureController {
     }
     public function delete($id = null) {
         require_once __DIR__ . '/../models/Lecture.php';
+        require_once __DIR__ . '/../models/Activity.php';
         if ($id) {
-            Lecture::delete($id);
+            $lecture = Lecture::find($id);
+            if ($lecture) {
+                $result = Lecture::delete($id);
+                if ($result) {
+                    // Log the activity
+                    $user_id = $_SESSION['user_id'] ?? null;
+                    Activity::logLectureArchived($user_id, $id, $lecture['title']);
+                }
+            }
         }
         header('Location: ?page=admin&section=lectures');
         exit;
     }
     public function archive($id = null) {
         require_once __DIR__ . '/../models/Lecture.php';
+        require_once __DIR__ . '/../models/Activity.php';
         if ($id) {
-            Lecture::archive($id);
+            $lecture = Lecture::find($id);
+            if ($lecture) {
+                $result = Lecture::archive($id);
+                if ($result) {
+                    // Log the activity
+                    $user_id = $_SESSION['user_id'] ?? null;
+                    Activity::logLectureArchived($user_id, $id, $lecture['title']);
+                }
+            }
         }
         header('Location: ?page=admin&section=lectures');
         exit;
     }
     public function restore($id = null) {
         require_once __DIR__ . '/../models/Lecture.php';
+        require_once __DIR__ . '/../models/Activity.php';
         if ($id) {
-            Lecture::restore($id);
+            $lecture = Lecture::find($id);
+            if ($lecture) {
+                $result = Lecture::restore($id);
+                if ($result) {
+                    // Log the activity
+                    $user_id = $_SESSION['user_id'] ?? null;
+                    Activity::logLectureRestored($user_id, $id, $lecture['title']);
+                }
+            }
         }
         header('Location: ?page=admin&section=archive');
         exit;
@@ -141,6 +187,7 @@ class LectureController {
         require_once __DIR__ . '/../models/Submission.php';
         require_once __DIR__ . '/../models/Lecture.php';
         require_once __DIR__ . '/../models/User.php';
+        require_once __DIR__ . '/../models/Activity.php';
         if (!$id) {
             header('Location: ?page=admin&section=lectures');
             exit;
@@ -152,7 +199,19 @@ class LectureController {
             $submission_id = intval($_POST['submission_id']);
             $grade = trim($_POST['grade'] ?? '');
             $feedback = trim($_POST['feedback'] ?? '');
-            Submission::updateGradeAndFeedback($submission_id, $grade, $feedback);
+            $result = Submission::updateGradeAndFeedback($submission_id, $grade, $feedback);
+            
+            if ($result) {
+                // Log the grading activity
+                $user_id = $_SESSION['user_id'] ?? null;
+                $submission = Submission::find($submission_id);
+                if ($submission && $lecture) {
+                    $student = User::findById($submission['student_id']);
+                    $student_name = $student ? $student['first_name'] . ' ' . $student['last_name'] : 'Unknown Student';
+                    Activity::logSubmissionGraded($user_id, $submission_id, $student_name, $lecture['title']);
+                }
+            }
+            
             // Refresh submissions after update
             $submissions = Submission::allForLectureWithStudent($id);
         }

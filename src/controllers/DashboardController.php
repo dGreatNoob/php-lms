@@ -6,16 +6,49 @@ class DashboardController {
         require_once __DIR__ . '/../models/Course.php';
         require_once __DIR__ . '/../models/Topic.php';
         require_once __DIR__ . '/../models/Lecture.php';
+        require_once __DIR__ . '/../models/Activity.php';
+        
         $role = $_SESSION['role'] ?? 'student';
         $user_id = $_SESSION['user_id'] ?? null;
         $full_name = '';
+        
         if ($user_id) {
             $user = User::findById($user_id);
             if ($user) {
                 $full_name = $user['first_name'] . ' ' . $user['last_name'];
             }
         }
+        
         if ($role === 'admin') {
+            // Fetch statistics for admin dashboard
+            global $conn;
+            
+            // Get course count
+            $course_result = $conn->query('SELECT COUNT(*) as count FROM courses WHERE archived = 0');
+            $course_count = $course_result->fetch_assoc()['count'];
+            
+            // Get student count
+            $student_result = $conn->query('SELECT COUNT(*) as count FROM users WHERE role = "student" AND archived = 0');
+            $student_count = $student_result->fetch_assoc()['count'];
+            
+            // Get lecture count
+            $lecture_result = $conn->query('SELECT COUNT(*) as count FROM lectures WHERE archived = 0');
+            $lecture_count = $lecture_result->fetch_assoc()['count'];
+            
+            // Get pending submissions count
+            $submission_result = $conn->query('SELECT COUNT(*) as count FROM submissions WHERE grade IS NULL');
+            $submission_count = $submission_result->fetch_assoc()['count'];
+            
+            $stats = [
+                'courses' => $course_count,
+                'students' => $student_count,
+                'lectures' => $lecture_count,
+                'submissions' => $submission_count
+            ];
+            
+            // Fetch recent activity
+            $recent_activity = Activity::getFormattedRecent(15);
+            
             include __DIR__ . '/../views/dashboard/admin.php';
         } else {
             // Fetch enrolled courses for the student
@@ -55,7 +88,15 @@ class DashboardController {
                     $conn->query("DELETE FROM submissions WHERE student_id = $student_id AND lecture_id = $lecture_id");
                 }
                 if ($text_submission || $file_path) {
-                    Submission::create($student_id, $lecture_id, $text_submission, $file_path);
+                    $submission_id = Submission::create($student_id, $lecture_id, $text_submission, $file_path);
+                    
+                    // Log the submission activity
+                    if ($submission_id) {
+                        $lecture = Lecture::find($lecture_id);
+                        if ($lecture) {
+                            Activity::logSubmissionSubmitted($student_id, $submission_id, $lecture['title']);
+                        }
+                    }
                 }
             }
             if ($user_id) {
@@ -111,6 +152,7 @@ class DashboardController {
             include __DIR__ . '/../views/dashboard/student.php';
         }
     }
+    
     public function archive() {
         require_once __DIR__ . '/../models/Lecture.php';
         require_once __DIR__ . '/../models/Topic.php';

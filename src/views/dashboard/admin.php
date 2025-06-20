@@ -134,31 +134,45 @@
                         </div>
                         <div class="card__body">
                             <?php if (isset($recent_activity) && !empty($recent_activity)): ?>
-                                <div class="table-container">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Action</th>
-                                                <th>Details</th>
-                                                <th>User</th>
-                                                <th>Date</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($recent_activity as $activity): ?>
+                                <div class="recent-activity-container">
+                                    <div class="table-container">
+                                        <table class="table">
+                                            <thead>
                                                 <tr>
-                                                    <td><?= htmlspecialchars($activity['action']) ?></td>
-                                                    <td><?= htmlspecialchars($activity['details']) ?></td>
-                                                    <td><?= htmlspecialchars($activity['user']) ?></td>
-                                                    <td><?= htmlspecialchars($activity['date']) ?></td>
+                                                    <th style="width: 120px;">Action</th>
+                                                    <th>Details</th>
+                                                    <th style="width: 150px;">User</th>
+                                                    <th style="width: 180px;">Date & Time</th>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($recent_activity as $activity): ?>
+                                                    <tr>
+                                                        <td>
+                                                            <span class="badge <?= htmlspecialchars($activity['action_class']) ?>">
+                                                                <?= htmlspecialchars($activity['action']) ?>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="font-medium"><?= htmlspecialchars($activity['details']) ?></div>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-sm text-muted"><?= htmlspecialchars($activity['user']) ?></span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-sm text-muted"><?= htmlspecialchars($activity['date']) ?></span>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             <?php else: ?>
                                 <div class="text-center p-8">
+                                    <div class="text-4xl mb-4">📋</div>
                                     <p class="text-muted">No recent activity to display</p>
+                                    <p class="text-sm text-muted mt-2">Activities will appear here as users interact with the system</p>
                                 </div>
                             <?php endif; ?>
                         </div>

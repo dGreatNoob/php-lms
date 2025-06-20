@@ -128,30 +128,38 @@
                                 </div>
 
                                 <div class="form__group">
-                                    <label for="semester" class="form__label form__label--required">
-                                        Semester
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        id="semester"
-                                        name="semester" 
-                                        class="form__input" 
-                                        required
-                                        placeholder="e.g., Fall 2024, Spring 2025"
-                                        aria-describedby="semester-help"
-                                    >
-                                    <div id="semester-help" class="form__help-text">
-                                        The semester when this course is offered
+                                    <label for="semester" class="form__label form__label--required">Semester</label>
+                                    <div class="flex flex--gap-2">
+                                        <select name="semester_period" id="semester_period" class="form__select">
+                                            <option value="1st Semester">1st Semester</option>
+                                            <option value="2nd Semester">2nd Semester</option>
+                                            <option value="Summer Class">Summer Class</option>
+                                        </select>
+                                        <?php
+                                            $current_year = date('Y');
+                                            $year_options = [];
+                                            for ($i = -1; $i <= 3; $i++) {
+                                                $start_year = $current_year + $i;
+                                                $end_year = $start_year + 1;
+                                                $year_options[] = "{$start_year}–{$end_year}";
+                                            }
+                                        ?>
+                                        <select name="semester_year" id="semester_year" class="form__select">
+                                            <?php foreach ($year_options as $year_option): ?>
+                                                <option value="<?= $year_option ?>"><?= $year_option ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
+                                    <p class="form__help-text">Select the period and enter the academic year.</p>
                                 </div>
 
-                                <div class="flex flex--gap-4">
+                                <div class="form__footer">
                                     <button type="submit" class="btn btn--primary">
-                                        <span>✅</span>
+                                        <span>✔️</span>
                                         <span>Create Course</span>
                                     </button>
                                     <a href="?page=admin&section=courses" class="btn btn--secondary">
-                                        <span>↩️</span>
+                                        <span>↪️</span>
                                         <span>Cancel</span>
                                     </a>
                                 </div>

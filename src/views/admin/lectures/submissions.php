@@ -73,10 +73,6 @@
                             <h1 class="dashboard__title">Lecture Submissions</h1>
                             <p class="dashboard__subtitle"><?= htmlspecialchars($lecture['title']) ?></p>
                         </div>
-                        <a href="?page=admin&section=lectures" class="btn btn--secondary">
-                            <span>↩️</span>
-                            <span>Back to Lectures</span>
-                        </a>
                     </div>
                 </div>
             </header>
@@ -157,7 +153,7 @@
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <form method="POST" class="form form--inline">
+                                                    <form method="POST" class="form">
                                                         <input type="hidden" name="submission_id" value="<?= $sub['id'] ?>">
                                                         <div class="form__group">
                                                             <label for="grade-<?= $sub['id'] ?>" class="form__label">Grade</label>
@@ -168,7 +164,6 @@
                                                                 value="<?= htmlspecialchars($sub['grade']) ?>" 
                                                                 placeholder="Grade" 
                                                                 class="form__input form__input--sm"
-                                                                size="6"
                                                             >
                                                         </div>
                                                         <div class="form__group">
@@ -176,13 +171,12 @@
                                                             <textarea 
                                                                 id="feedback-<?= $sub['id'] ?>"
                                                                 name="feedback" 
-                                                                rows="2" 
-                                                                cols="20" 
+                                                                rows="3" 
                                                                 placeholder="Feedback"
                                                                 class="form__textarea form__textarea--sm"
                                                             ><?= htmlspecialchars($sub['feedback']) ?></textarea>
                                                         </div>
-                                                        <button type="submit" class="btn btn--sm btn--primary">
+                                                        <button type="submit" class="btn btn--sm btn--primary w-full">
                                                             <span>💾</span>
                                                             <span>Save</span>
                                                         </button>

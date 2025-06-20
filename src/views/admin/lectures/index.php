@@ -82,21 +82,60 @@
                                     <h2 class="card__title">All Lectures</h2>
                                     <p class="card__subtitle">Total: <?= count($lectures) ?> lectures</p>
                                 </div>
-                                <a href="?page=admin&section=lectures&action=create" class="btn btn--primary">
-                                    <span>➕</span>
-                                    <span>Add Lecture</span>
-                                </a>
+                                <?php if (!empty($lectures)): ?>
+                                    <a href="?page=admin&section=lectures&action=create" class="btn btn--primary">
+                                        <span>➕</span>
+                                        <span>Add Lecture</span>
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="card__body">
+                            <form method="GET" class="mb-4" id="filter-form">
+                                <input type="hidden" name="page" value="admin">
+                                <input type="hidden" name="section" value="lectures">
+                                <div class="grid grid--cols-3 grid--gap-4">
+                                    <div class="form__group">
+                                        <label for="course_id" class="form__label">Filter by Course</label>
+                                        <select name="course_id" id="course_id" class="form__select">
+                                            <option value="">All Courses</option>
+                                            <?php foreach ($courses as $course): ?>
+                                                <option value="<?= $course['id'] ?>" <?= (isset($_GET['course_id']) && $_GET['course_id'] == $course['id']) ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($course['title']) ?> (<?= htmlspecialchars($course['code']) ?>)
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="form__group">
+                                        <label for="topic_id" class="form__label">Filter by Topic</label>
+                                        <select name="topic_id" id="topic_id" class="form__select">
+                                            <option value="">All Topics</option>
+                                            <?php foreach ($topics as $topic): ?>
+                                                <option value="<?= $topic['id'] ?>" data-course-id="<?= $topic['course_id'] ?>" <?= (isset($_GET['topic_id']) && $_GET['topic_id'] == $topic['id']) ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($topic['title']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="form__group">
+                                        <label for="submit" class="form__label">&nbsp;</label>
+                                        <div class="flex flex--gap-2">
+                                            <button type="submit" class="btn btn--primary">Filter</button>
+                                            <a href="?page=admin&section=lectures" class="btn btn--secondary">Clear</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
                             <?php if (empty($lectures)): ?>
                                 <div class="text-center p-8">
-                                    <div class="text-4xl mb-4">🎓</div>
-                                    <h3 class="text-lg font-semibold mb-2">No Lectures Found</h3>
-                                    <p class="text-muted mb-4">Get started by creating your first lecture.</p>
-                                    <a href="?page=admin&section=lectures&action=create" class="btn btn--primary">
-                                        Create First Lecture
-                                    </a>
+                                    <div class="text-4xl mb-4">🎬</div>
+                                    <h3 class="font-bold text-lg">No Lectures Found</h3>
+                                    <?php if (empty($courses) && empty($topics)): ?>
+                                        <p class="text-gray-500">Create a <a href="?page=admin&section=courses&view=create" class="text-primary-500">course</a> and a <a href="?page=admin&section=topics&view=create" class="text-primary-500">topic</a> first.</p>
+                                    <?php else: ?>
+                                        <a href="?page=admin&section=lectures&view=create" class="btn btn--primary mt-4">Add Lecture</a>
+                                    <?php endif; ?>
                                 </div>
                             <?php else: ?>
                                 <div class="table-container">
@@ -163,18 +202,14 @@
                                                            data-tooltip="View submissions">
                                                             📝 Submissions
                                                         </a>
-                                                        <a href="?page=admin&section=lectures&action=archive&id=<?= $lecture['id'] ?>" 
-                                                           class="btn btn--sm btn--warning"
-                                                           onclick="return confirm('Archive this lecture?')"
+                                                        <button type="button"
+                                                           class="btn btn--sm btn--danger js-delete-trigger"
+                                                           data-delete-url="?page=admin&section=lectures&action=delete&id=<?= $lecture['id'] ?>"
+                                                           data-entity-name="<?= htmlspecialchars($lecture['title']) ?>"
+                                                           data-entity-type="lecture"
                                                            data-tooltip="Archive lecture">
                                                             📦 Archive
-                                                        </a>
-                                                        <a href="?page=admin&section=lectures&action=delete&id=<?= $lecture['id'] ?>" 
-                                                           class="btn btn--sm btn--danger"
-                                                           onclick="return confirm('Are you sure you want to delete this lecture? This action cannot be undone.')"
-                                                           data-tooltip="Delete lecture">
-                                                            🗑️ Delete
-                                                        </a>
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -189,7 +224,36 @@
             </div>
         </main>
     </div>
+    
+    <!-- Confirmation Modal -->
+    <div class="modal-backdrop" id="delete-modal" style="display: none;">
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title">Confirm Action</h3>
+                <button class="modal__close" data-modal-close="#delete-modal">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div class="alert alert--error">
+                    <span class="alert__icon">⚠️</span>
+                    <div class="alert__content">
+                        <div class="alert__title">Warning!</div>
+                        <div class="alert__message" id="delete-modal-warning-message"></div>
+                    </div>
+                </div>
+                <p class="mt-4">Are you sure you want to proceed? This action cannot be undone.</p>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" data-modal-close="#delete-modal">Cancel</button>
+                <a href="#" id="confirm-delete-btn" class="btn btn--danger">Confirm</a>
+            </div>
+        </div>
+    </div>
 
-    <script src="js/script.js"></script>
+    <?php include __DIR__ . '/../../partials/footer.php'; ?>
 </body>
-</html> 
+</html>
+
+<script>
+    const allTopics = <?= json_encode($topics) ?>;
+</script>
+<script src="js/script.js"></script> 

@@ -99,10 +99,19 @@
                             <?php
                             if (!function_exists('render_topic')) {
                                 function render_topic($topic, $lectures_by_topic, $user_id, $level = 0) {
+                                    $has_children = !empty($topic['children']);
+                                    $accordion_id = 'topic-accordion-' . $topic['id'];
                                     $indent_class = 'ml-' . ($level * 4);
                                     echo "<div class='topic-group {$indent_class}'>";
+                                    echo "<div class='topic-header flex flex--between items-center'>";
                                     echo "<h4 class='font-semibold text-lg mb-3'>" . htmlspecialchars($topic['title']) . "</h4>";
-
+                                    if ($has_children) {
+                                        echo "<button class='btn btn--icon btn--sm topic-toggle' data-target='{$accordion_id}' aria-label='Toggle subtopics'>";
+                                        echo "<span>▼</span>";
+                                        echo "</button>";
+                                    }
+                                    echo "</div>";
+                                    // Lectures for this topic
                                     if (!empty($lectures_by_topic[$topic['id']])) {
                                         echo "<div class='space-y-4'>";
                                         foreach ($lectures_by_topic[$topic['id']] as $lecture) {
@@ -110,11 +119,13 @@
                                         }
                                         echo "</div>";
                                     }
-
-                                    if (!empty($topic['children'])) {
+                                    // Subtopics (children)
+                                    if ($has_children) {
+                                        echo "<div class='topic-children' id='{$accordion_id}' style='display:none; margin-left:1.5rem;'>";
                                         foreach ($topic['children'] as $child_topic) {
                                             render_topic($child_topic, $lectures_by_topic, $user_id, $level + 1);
                                         }
+                                        echo "</div>";
                                     }
                                     echo "</div>";
                                 }
@@ -122,7 +133,7 @@
 
                             if (!function_exists('render_lecture')) {
                                 function render_lecture($lecture, $user_id) {
-                                    $existing = $user_id ? Submission::findByStudentAndLecture($user_id, $lecture['id']) : null;
+                                    $existing = $user_id ? Submission::findByLectureAndStudent($lecture['id'], $user_id) : null;
                                     $status = 'pending';
                                     $status_text = 'Not Started';
                                     if ($existing) {
@@ -321,6 +332,17 @@
             accordions[0].classList.add('accordion__item--active');
             console.log('First accordion opened by default');
         }
+
+        // Nested topic dropdown logic
+        document.querySelectorAll('.topic-toggle').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.getElementById(btn.getAttribute('data-target'));
+                if (target) {
+                    target.style.display = (target.style.display === 'none' || target.style.display === '') ? 'block' : 'none';
+                }
+            });
+        });
     });
     </script>
 </body>

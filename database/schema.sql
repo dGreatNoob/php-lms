@@ -17,7 +17,7 @@ CREATE TABLE courses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(20) NOT NULL UNIQUE,
     title VARCHAR(100) NOT NULL,
-    semester VARCHAR(20) NOT NULL,
+    semester VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -36,24 +36,34 @@ CREATE TABLE topics (
 ) ENGINE=InnoDB;
 
 -- Lectures (can be attached to topics)
-CREATE TABLE lectures (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    topic_id INT NOT NULL,
-    title VARCHAR(100) NOT NULL,
-    content TEXT,
-    file_path VARCHAR(255),
-    image_path VARCHAR(255),
-    archived TINYINT(1) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    due_date DATETIME DEFAULT NULL,
-    FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+CREATE TABLE `lectures` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `topic_id` int(11) NOT NULL,
+    `title` varchar(255) NOT NULL,
+    `content` text,
+    `attachment` varchar(255) DEFAULT NULL,
+    `allow_submissions` tinyint(1) NOT NULL DEFAULT '0',
+    `due_date` datetime DEFAULT NULL,
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `archived` tinyint(1) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    KEY `topic_id` (`topic_id`),
+    CONSTRAINT `lectures_ibfk_1` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Add submission requirement columns to lectures
-ALTER TABLE lectures
-ADD COLUMN requires_submission TINYINT(1) DEFAULT 0,
-ADD COLUMN submission_type ENUM('text','file','both') DEFAULT 'file',
-ADD COLUMN submission_instructions TEXT DEFAULT NULL;
+ALTER TABLE `lectures`
+    DROP COLUMN `file_path`,
+    DROP COLUMN `image_path`,
+    DROP COLUMN `requires_submission`,
+    DROP COLUMN `submission_type`,
+    DROP COLUMN `submission_instructions`;
+
+ALTER TABLE `lectures`
+    ADD COLUMN `attachment` varchar(255) DEFAULT NULL AFTER `content`,
+    ADD COLUMN `allow_submissions` tinyint(1) NOT NULL DEFAULT '0' AFTER `attachment`,
+    ADD COLUMN `due_date` datetime DEFAULT NULL AFTER `allow_submissions`;
 
 -- Enrollments
 CREATE TABLE enrollments (
@@ -90,4 +100,16 @@ CREATE TABLE IF NOT EXISTS submissions (
     feedback TEXT DEFAULT NULL,
     FOREIGN KEY (student_id) REFERENCES users(id),
     FOREIGN KEY (lecture_id) REFERENCES lectures(id)
-); 
+);
+
+-- Activity logging table
+CREATE TABLE activities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action_type ENUM('create', 'update', 'delete', 'archive', 'restore', 'enroll', 'unenroll', 'submit', 'grade') NOT NULL,
+    entity_type ENUM('course', 'topic', 'lecture', 'user', 'enrollment', 'submission') NOT NULL,
+    entity_id INT,
+    details TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB; 

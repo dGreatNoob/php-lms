@@ -82,6 +82,7 @@
                                     <h2 class="card__title">All Enrollments</h2>
                                     <p class="card__subtitle">Total: <?= count($enrollments) ?> enrollments</p>
                                 </div>
+                                <?php if (!empty($enrollments)): ?>
                                 <div class="flex flex--gap-2">
                                     <a href="?page=admin&section=enrollments&action=import" class="btn btn--secondary">
                                         <span>📥</span>
@@ -92,6 +93,7 @@
                                         <span>Enroll Student</span>
                                     </a>
                                 </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="card__body">
@@ -100,7 +102,7 @@
                                     <div class="text-4xl mb-4">👥</div>
                                     <h3 class="text-lg font-semibold mb-2">No Enrollments Found</h3>
                                     <p class="text-muted mb-4">Get started by enrolling your first student.</p>
-                                    <div class="flex flex--gap-2 justify-center">
+                                    <div class="flex flex--gap-2 flex--center">
                                         <a href="?page=admin&section=enrollments&action=import" class="btn btn--secondary">
                                             Import from CSV
                                         </a>
@@ -136,12 +138,14 @@
                                                 <td><?= htmlspecialchars($enroll['course_title']) ?></td>
                                                 <td>
                                                     <div class="flex flex--gap-2">
-                                                        <a href="?page=admin&section=enrollments&action=delete&id=<?= $enroll['id'] ?>" 
-                                                           class="btn btn--sm btn--danger"
-                                                           onclick="return confirm('Are you sure you want to remove this enrollment? This action cannot be undone.')"
+                                                        <button type="button" 
+                                                           class="btn btn--sm btn--danger js-delete-trigger"
+                                                           data-delete-url="?page=admin&section=enrollments&action=delete&id=<?= $enroll['id'] ?>"
+                                                           data-entity-name="this enrollment"
+                                                           data-entity-type="enrollment"
                                                            data-tooltip="Remove enrollment">
                                                             🗑️ Remove
-                                                        </a>
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -155,6 +159,30 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-backdrop" id="delete-modal" style="display: none;">
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title">Confirm Deletion</h3>
+                <button class="modal__close" data-modal-close="#delete-modal">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div class="alert alert--error">
+                    <span class="alert__icon">⚠️</span>
+                    <div class="alert__content">
+                        <div class="alert__title">Warning!</div>
+                        <div class="alert__message" id="delete-modal-warning-message"></div>
+                    </div>
+                </div>
+                <p class="mt-4">Are you sure you want to proceed? This action cannot be undone.</p>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" data-modal-close="#delete-modal">Cancel</button>
+                <a href="#" id="confirm-delete-btn" class="btn btn--danger">Confirm Delete</a>
+            </div>
+        </div>
     </div>
 
     <script src="js/script.js"></script>

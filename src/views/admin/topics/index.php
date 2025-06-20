@@ -82,13 +82,34 @@
                                     <h2 class="card__title">All Topics</h2>
                                     <p class="card__subtitle">Total: <?= count($topics) ?> topics</p>
                                 </div>
+                                <?php if (!empty($topics)): ?>
                                 <a href="?page=admin&section=topics&action=create" class="btn btn--primary">
                                     <span>➕</span>
                                     <span>Add Topic</span>
                                 </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="card__body">
+                            <form method="GET" class="mb-4">
+                                <input type="hidden" name="page" value="admin">
+                                <input type="hidden" name="section" value="topics">
+                                <div class="form__group">
+                                    <label for="course_id" class="form__label">Filter by Course</label>
+                                    <div class="flex flex--gap-2">
+                                        <select name="course_id" id="course_id" class="form__select" onchange="this.form.submit()">
+                                            <option value="">All Courses</option>
+                                            <?php foreach ($courses as $course): ?>
+                                                <option value="<?= $course['id'] ?>" <?= (isset($_GET['course_id']) && $_GET['course_id'] == $course['id']) ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($course['title']) ?> (<?= htmlspecialchars($course['code']) ?>)
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <a href="?page=admin&section=topics" class="btn btn--secondary">Clear</a>
+                                    </div>
+                                </div>
+                            </form>
+                        
                             <?php if (empty($topics)): ?>
                                 <div class="text-center p-8">
                                     <div class="text-4xl mb-4">📋</div>
@@ -147,12 +168,14 @@
                                                                    data-tooltip="Edit topic">
                                                                     ✏️ Edit
                                                                 </a>
-                                                                <a href="?page=admin&section=topics&action=delete&id=<?= $topic['id'] ?>" 
-                                                                   class="btn btn--sm btn--danger"
-                                                                   onclick="return confirm('Are you sure you want to delete this topic? This action cannot be undone.')"
-                                                                   data-tooltip="Delete topic">
+                                                                <button type="button"
+                                                                    class="btn btn--sm btn--danger js-delete-trigger"
+                                                                    data-delete-url="?page=admin&section=topics&action=delete&id=<?= $topic['id'] ?>"
+                                                                    data-entity-name="<?= htmlspecialchars($topic['title']) ?>"
+                                                                    data-entity-type="topic"
+                                                                    data-tooltip="Delete topic">
                                                                     🗑️ Delete
-                                                                </a>
+                                                                </button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -179,4 +202,28 @@
 
     <script src="js/script.js"></script>
 </body>
-</html> 
+</html>
+<div class="modal-backdrop" id="delete-modal" style="display: none;">
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title">Confirm Deletion</h3>
+                <button class="modal__close" data-modal-close="#delete-modal">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div class="alert alert--error">
+                    <span class="alert__icon">⚠️</span>
+                    <div class="alert__content">
+                        <div class="alert__title">Warning!</div>
+                        <div class="alert__message" id="delete-modal-warning-message">
+                            This is a generic warning.
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-4">Are you sure you want to proceed? This action cannot be undone.</p>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn--secondary" data-modal-close="#delete-modal">Cancel</button>
+                <a href="#" id="confirm-delete-btn" class="btn btn--danger">Confirm Delete</a>
+            </div>
+        </div>
+    </div> 

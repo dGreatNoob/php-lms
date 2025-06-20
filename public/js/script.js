@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { initializeProgressBars(); } catch (e) { console.error("Progress Bar Error:", e); }
     try { initializeAccessibility(); } catch (e) { console.error("Accessibility Error:", e); }
     try { initializeInteractiveComponents(); } catch (e) { console.error("Interactive Component Error:", e); }
+    try { initializeDependentDropdowns(); } catch (e) { console.error("Dependent Dropdown Error:", e); }
 });
 
 // Theme Management
@@ -96,7 +97,7 @@ function initializeModals() {
 }
 
 function openModal(modal) {
-    modal.style.display = 'flex';
+      modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     const firstFocusable = modal.querySelector('button, input, select, textarea, a[href]');
     if (firstFocusable) firstFocusable.focus();
@@ -221,7 +222,7 @@ function initializeAccessibility() {
     const mainContent = document.querySelector('main, .dashboard__main');
     if (mainContent && !mainContent.id) {
         mainContent.id = 'main-content';
-    }
+      }
 }
 
 // General Interactive Components (e.g., tooltips, confirmations)
@@ -236,6 +237,57 @@ function initializeInteractiveComponents() {
             }
         }
     });
+
+    // Confirmation dialogs
+    document.addEventListener('DOMContentLoaded', () => {
+        const deleteModal = document.getElementById('delete-modal');
+        if (!deleteModal) return;
+
+        const warningMessageEl = document.getElementById('delete-modal-warning-message');
+        const confirmBtn = document.getElementById('confirm-delete-btn');
+
+        document.querySelectorAll('.js-delete-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                const deleteUrl = trigger.dataset.deleteUrl;
+                const entityName = trigger.dataset.entityName;
+                const entityType = trigger.dataset.entityType;
+
+                let warning = `You are about to delete the ${entityType}: <strong>${entityName}</strong>.`;
+                if (entityType === 'course') {
+                    warning = `You are about to archive the course: <strong>${entityName}</strong>. This will also archive all its topics and lectures.`;
+                } else if (entityType === 'topic') {
+                    warning = `You are about to archive the topic: <strong>${entityName}</strong>. This will also archive all its sub-topics and lectures.`;
+                } else if (entityType === 'lecture') {
+                    warning = `You are about to archive the lecture: <strong>${entityName}</strong>. This will also delete all student submissions for this lecture.`;
+                } else if (entityType === 'enrollment') {
+                    warning = `You are about to remove the enrollment for <strong>${entityName}</strong>.`;
+                }
+                
+                warningMessageEl.innerHTML = warning;
+                confirmBtn.href = deleteUrl;
+                deleteModal.style.display = 'flex';
+            });
+        });
+
+        // Generic modal close triggers
+        deleteModal.querySelectorAll('[data-modal-close]').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                const modal = document.querySelector(trigger.dataset.modalClose);
+                if(modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        // Close modal if backdrop is clicked
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                deleteModal.style.display = 'none';
+            }
+        });
+    });
 }
 
 // Utility: Debounce function
@@ -249,4 +301,91 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+}
+
+// Dependent Dropdowns
+function initializeDependentDropdowns() {
+    // Lecture filters
+    const filterForm = document.getElementById('filter-form');
+    if (filterForm) {
+        const courseSelect = document.getElementById('course_id');
+        const topicSelect = document.getElementById('topic_id');
+        
+        // Check if allTopics is defined and is an array from the view
+        if (typeof allTopics !== 'undefined' && Array.isArray(allTopics)) {
+            
+            const updateTopicOptions = () => {
+                const selectedCourseId = courseSelect.value;
+                const currentTopicValue = topicSelect.value;
+
+                // Filter topics based on the selected course
+                const relevantTopics = allTopics.filter(topic => !selectedCourseId || topic.course_id == selectedCourseId);
+                
+                // Preserve the "All Topics" option
+                topicSelect.innerHTML = '<option value="">All Topics</option>';
+
+                // Repopulate the dropdown
+                relevantTopics.forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic.id;
+                    option.textContent = topic.title;
+                    // Keep the topic selected if it was before the update
+                    option.selected = topic.id == currentTopicValue;
+                    topicSelect.appendChild(option);
+                });
+                
+                // If the previously selected topic isn't in the new list, reset to "All Topics"
+                if (!relevantTopics.some(topic => topic.id == currentTopicValue)) {
+                    topicSelect.value = "";
+                }
+            };
+
+            courseSelect.addEventListener('change', updateTopicOptions);
+
+            // Initial call to set the correct state on page load
+            updateTopicOptions();
+        }
+    }
+
+    // Lecture filters for dependent dropdowns
+    const lectureFilterForm = document.getElementById('filter-form');
+    if (lectureFilterForm) {
+        const courseSelect = document.getElementById('course_id');
+        const topicSelect = document.getElementById('topic_id');
+        
+        // The 'allTopics' variable is expected to be defined in a <script> tag in the HTML view
+        if (typeof allTopics !== 'undefined' && Array.isArray(allTopics)) {
+            
+            const updateTopicOptions = () => {
+                const selectedCourseId = courseSelect.value;
+                const currentTopicValue = topicSelect.value;
+                
+                // Filter topics based on the selected course
+                const relevantTopics = allTopics.filter(topic => !selectedCourseId || topic.course_id == selectedCourseId);
+                
+                // Preserve the "All Topics" option and clear the rest
+                topicSelect.innerHTML = '<option value="">All Topics</option>';
+
+                // Repopulate the dropdown with relevant topics
+                relevantTopics.forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic.id;
+                    option.textContent = topic.title;
+                    option.selected = topic.id == currentTopicValue; // Keep selection if possible
+                    topicSelect.appendChild(option);
+                });
+                
+                // If the previously selected topic isn't in the new filtered list, reset the selection
+                if (!relevantTopics.some(topic => topic.id == currentTopicValue)) {
+                    topicSelect.value = "";
+                }
+            };
+
+            // Add event listener to the course dropdown
+            courseSelect.addEventListener('change', updateTopicOptions);
+
+            // Initial call to set the correct state when the page loads
+            updateTopicOptions();
+        }
+    }
 }

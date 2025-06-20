@@ -90,35 +90,27 @@
                                 </div>
                             <?php endif; ?>
 
-                            <form method="POST" action="?page=admin&section=lectures&action=create" enctype="multipart/form-data" class="form" data-validate>
+                            <form action="?page=admin&section=lectures&action=create" method="POST" id="create-lecture-form" enctype="multipart/form-data">
                                 <div class="form__group">
-                                    <label for="topic_id" class="form__label form__label--required">
-                                        Topic
-                                    </label>
+                                    <label for="course_id" class="form__label">Course <span class="text-red-500">*</span></label>
+                                    <select id="course_id" class="form__select" required>
+                                        <option value="">-- Select Course --</option>
+                                        <?php foreach ($courses as $course): ?>
+                                            <option value="<?= $course['id'] ?>"><?= htmlspecialchars($course['title']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <p class="form__help">Select the course this lecture belongs to.</p>
+                                </div>
+
+                                <div class="form__group">
+                                    <label for="topic_id" class="form__label">Topic <span class="text-red-500">*</span></label>
                                     <select name="topic_id" id="topic_id" class="form__select" required>
                                         <option value="">-- Select Topic --</option>
-                                        <?php
-                                        // Build a tree of topics for hierarchical dropdown
-                                        $tree = [];
-                                        foreach ($topics as $topic) {
-                                            $tree[$topic['course_id']][$topic['parent_topic_id']][] = $topic;
-                                        }
-                                        function renderTopicOptions($tree, $course_id, $parent_id = null, $level = 0) {
-                                            if (!isset($tree[$course_id][$parent_id])) return;
-                                            foreach ($tree[$course_id][$parent_id] as $topic) {
-                                                $indent = str_repeat('&nbsp;&nbsp;&nbsp;', $level);
-                                                echo '<option value="' . $topic['id'] . '">' . $indent . htmlspecialchars($topic['title']) . ' (' . htmlspecialchars($topic['course_title']) . ')</option>';
-                                                renderTopicOptions($tree, $course_id, $topic['id'], $level + 1);
-                                            }
-                                        }
-                                        foreach ($tree as $course_id => $byParent) {
-                                            renderTopicOptions($tree, $course_id, null, 0);
-                                        }
-                                        ?>
+                                        <?php foreach ($topics as $topic): ?>
+                                            <option value="<?= $topic['id'] ?>" data-course-id="<?= $topic['course_id'] ?>"><?= htmlspecialchars($topic['title']) ?></option>
+                                        <?php endforeach; ?>
                                     </select>
-                                    <div class="form__help-text">
-                                        Select the topic this lecture belongs to
-                                    </div>
+                                    <p class="form__help">Select the topic this lecture belongs to.</p>
                                 </div>
 
                                 <div class="form__group">
@@ -275,9 +267,50 @@
 
     <script src="js/script.js"></script>
     <script>
-    document.querySelector('input[name="requires_submission"]').addEventListener('change', function() {
-        const submissionOptions = document.getElementById('submission-options');
-        submissionOptions.style.display = this.checked ? 'block' : 'none';
+    document.addEventListener('DOMContentLoaded', function() {
+        // Logic for dependent Topic dropdown
+        const courseSelect = document.getElementById('course_id');
+        const topicSelect = document.getElementById('topic_id');
+        if (courseSelect && topicSelect) {
+            const allTopicOptions = Array.from(topicSelect.options);
+
+            const updateTopicDropdown = () => {
+                const selectedCourseId = courseSelect.value;
+                const currentTopicValue = topicSelect.value;
+
+                topicSelect.innerHTML = '';
+                topicSelect.appendChild(allTopicOptions[0]); // Keep the placeholder
+
+                allTopicOptions.forEach(option => {
+                    if (option.value === "" || option.getAttribute('data-course-id') === selectedCourseId) {
+                        if (option.getAttribute('data-course-id') === selectedCourseId) {
+                            topicSelect.appendChild(option);
+                        }
+                    }
+                });
+
+                const newOptionExists = Array.from(topicSelect.options).some(opt => opt.value === currentTopicValue);
+                if (newOptionExists) {
+                    topicSelect.value = currentTopicValue;
+                } else {
+                    topicSelect.value = "";
+                }
+            };
+
+            courseSelect.addEventListener('change', updateTopicDropdown);
+            updateTopicDropdown(); // Initial call
+        }
+
+        // Logic for submission options
+        const allowSubmissionsCheckbox = document.getElementById('allow_submissions');
+        const submissionOptions = document.getElementById('submission_options');
+        if (allowSubmissionsCheckbox && submissionOptions) {
+            allowSubmissionsCheckbox.addEventListener('change', function() {
+                submissionOptions.style.display = this.checked ? 'block' : 'none';
+            });
+            // Initial state
+            submissionOptions.style.display = allowSubmissionsCheckbox.checked ? 'block' : 'none';
+        }
     });
     </script>
 </body>

@@ -6,12 +6,23 @@ class Enrollment {
         $result = $conn->query($sql);
         return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
+    
+    public static function find($id) {
+        global $conn;
+        $stmt = $conn->prepare('SELECT * FROM enrollments WHERE id = ?');
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+    
     public static function create($student_id, $course_id) {
         global $conn;
         $stmt = $conn->prepare('INSERT INTO enrollments (student_id, course_id) VALUES (?, ?)');
         $stmt->bind_param('ii', $student_id, $course_id);
         return $stmt->execute();
     }
+    
     public static function delete($id) {
         global $conn;
         $stmt = $conn->prepare('DELETE FROM enrollments WHERE id = ?');
