@@ -1460,3 +1460,107 @@ a:focus-visible {
     border: 1px solid var(--color-gray-300);
   }
 }
+
+[data-theme="dark"] .dashboard {
+  background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+}
+[data-theme="dark"] .card {
+  background-color: #181f2a;
+  border-color: #232a36;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.45);
+}
+[data-theme="dark"] .card__header,
+[data-theme="dark"] .card__footer {
+  background-color: #151a23;
+  border-color: #232a36;
+}
+[data-theme="dark"] .card__subtitle {
+  color: #9ca3af;
+}
+[data-theme="dark"] .dashboard__content {
+  background: none;
+}
+[data-theme="dark"] .card__title {
+  color: #f9fafb;
+}
+[data-theme="dark"] .card {
+  color: #d1d5db;
+}
+
+[data-theme="dark"] .topic-accordion,
+[data-theme="dark"] .lecture-accordion {
+  background: #181f2a;
+  border-bottom: 1px solid #232a36;
+}
+[data-theme="dark"] .topic-accordion__title,
+[data-theme="dark"] .lecture-accordion__title {
+  background: #232a36;
+  color: #e5e7eb;
+}
+[data-theme="dark"] .topic-accordion__title[aria-expanded="true"],
+[data-theme="dark"] .lecture-accordion__title[aria-expanded="true"] {
+  background: #232a36;
+  color: #fff;
+}
+[data-theme="dark"] .topic-accordion__details,
+[data-theme="dark"] .lecture-accordion__details {
+  background: #181f2a;
+  color: #d1d5db;
+}
+[data-theme="dark"] .topic-accordion__title:hover,
+[data-theme="dark"] .lecture-accordion__title:hover {
+  background: #2a3240;
+}
+
+[data-theme="dark"] .table-container {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+}
+[data-theme="dark"] .table {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+[data-theme="dark"] .table th {
+  background: #232a36;
+  color: #e5e7eb;
+  border-bottom: 1px solid #374151;
+}
+[data-theme="dark"] .table td {
+  background: transparent;
+  color: #d1d5db;
+  border-bottom: 1px solid #232a36;
+}
+[data-theme="dark"] .table tbody tr {
+  border-bottom: 1px solid #232a36;
+}
+[data-theme="dark"] .table .title-col {
+  color: #f9fafb;
+}
+[data-theme="dark"] .form__select,
+[data-theme="dark"] .form__input {
+  background: #181f2a;
+  color: #e5e7eb;
+  border-color: #374151;
+}
+[data-theme="dark"] .form__select:focus,
+[data-theme="dark"] .form__input:focus {
+  border-color: #60a5fa;
+}
+[data-theme="dark"] .form__label {
+  color: #d1d5db;
+}
+[data-theme="dark"] .btn--primary {
+  background: var(--color-primary-700);
+  color: #fff;
+}
+[data-theme="dark"] .btn--secondary {
+  background: #232a36;
+  color: #e5e7eb;
+}
+[data-theme="dark"] .btn--danger {
+  background: var(--color-error-600);
+  color: #fff;
+}
+[data-theme="dark"] .card__subtitle {
+  color: #9ca3af;
+}

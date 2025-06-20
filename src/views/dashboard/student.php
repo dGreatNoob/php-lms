@@ -2,13 +2,21 @@
 // Count pending submissions for the current student
 if (!isset($stats)) $stats = [];
 $stats['pending_submissions'] = 0;
+// Count completed and total lectures for the stat
+$completed_lectures = 0;
+$total_lectures = 0;
+$pending_submissions = 0;
 if (!empty($lectures_by_topic) && !empty($user_id)) {
     foreach ($lectures_by_topic as $topic_lectures) {
         foreach ($topic_lectures as $lecture) {
             if (!empty($lecture['allow_submissions'])) {
+                $total_lectures++;
                 $existing = Submission::findByStudentAndLecture($user_id, $lecture['id']);
+                if ($existing && ($existing['grade'] !== null || $existing['feedback'])) {
+                    $completed_lectures++;
+                }
                 if (!$existing) {
-                    $stats['pending_submissions']++;
+                    $pending_submissions++;
                 }
             }
         }
@@ -59,7 +67,7 @@ if (!empty($lectures_by_topic) && !empty($user_id)) {
                                 <div class="flex flex--between">
                                     <div>
                                         <p class="text-muted text-sm">Completed Lectures</p>
-                                        <h3 class="text-xl font-bold"><?= $stats['completed_lectures'] ?? 0 ?></h3>
+                                        <h3 class="text-xl font-bold"><?php echo "$completed_lectures/$total_lectures"; ?></h3>
                                     </div>
                                     <div class="text-2xl">✅</div>
                                 </div>
@@ -71,7 +79,7 @@ if (!empty($lectures_by_topic) && !empty($user_id)) {
                                 <div class="flex flex--between">
                                     <div>
                                         <p class="text-muted text-sm">Pending Submissions</p>
-                                        <h3 class="text-xl font-bold"><?= $stats['pending_submissions'] ?? 0 ?></h3>
+                                        <h3 class="text-xl font-bold"><?php echo $pending_submissions; ?></h3>
                                     </div>
                                     <div class="text-2xl">📝</div>
                                 </div>
