@@ -96,41 +96,33 @@
                         <div class="card__body">
                             <!-- Archived Lectures -->
                             <div id="archive-lectures" class="archive-table">
+                                <h3 class="mb-2">Archived Lectures</h3>
                                 <div class="table-container">
                                     <table class="table">
                                         <thead>
                                             <tr>
                                                 <th>Title</th>
-                                                <th>Topic ID</th>
+                                                <th>Topic</th>
+                                                <th>Course</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($archived_lectures as $item): ?>
+                                            <?php if (empty($archived_lectures)): ?>
+                                                <tr><td colspan="4" class="text-center text-muted">No archived lectures found.</td></tr>
+                                            <?php else: foreach ($archived_lectures as $item): ?>
                                             <tr>
-                                                <td>
-                                                    <div class="font-medium"><?= htmlspecialchars($item['title']) ?></div>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge--info"><?= htmlspecialchars($item['topic_id']) ?></span>
-                                                </td>
+                                                <td><div class="font-medium"><?= htmlspecialchars($item['title']) ?></div></td>
+                                                <td><span class="badge badge--info"><?= htmlspecialchars($item['topic_title']) ?></span></td>
+                                                <td><span class="badge badge--primary"><?= htmlspecialchars($item['course_title']) ?></span></td>
                                                 <td>
                                                     <div class="flex flex--gap-2">
-                                                        <a href="?page=admin&section=lectures&action=restore&id=<?= $item['id'] ?>" 
-                                                           class="btn btn--sm btn--success"
-                                                           data-tooltip="Restore lecture">
-                                                            🔄 Restore
-                                                        </a>
-                                                        <a href="?page=admin&section=archive&action=delete_permanent_lecture&id=<?= $item['id'] ?>" 
-                                                           class="btn btn--sm btn--danger"
-                                                           onclick="return confirm('Permanently delete this lecture? This cannot be undone.')"
-                                                           data-tooltip="Delete permanently">
-                                                            🗑️ Delete Permanently
-                                                        </a>
+                                                        <a href="?page=admin&section=lectures&action=restore&id=<?= $item['id'] ?>" class="btn btn--sm btn--success" data-tooltip="Restore lecture">🔄 Restore</a>
+                                                        <a href="?page=admin&section=archive&action=delete_permanent_lecture&id=<?= $item['id'] ?>" class="btn btn--sm btn--danger" onclick="return confirm('Permanently delete this lecture? This cannot be undone.')" data-tooltip="Delete permanently">🗑️ Delete Permanently</a>
                                                     </div>
                                                 </td>
                                             </tr>
-                                            <?php endforeach; ?>
+                                            <?php endforeach; endif; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -138,6 +130,7 @@
 
                             <!-- Archived Topics -->
                             <div id="archive-topics" class="archive-table" style="display:none;">
+                                <h3 class="mb-2">Archived Topics</h3>
                                 <div class="table-container">
                                     <table class="table">
                                         <thead>
@@ -148,31 +141,20 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($archived_topics as $item): ?>
+                                            <?php if (empty($archived_topics)): ?>
+                                                <tr><td colspan="3" class="text-center text-muted">No archived topics found.</td></tr>
+                                            <?php else: foreach ($archived_topics as $item): ?>
                                             <tr>
-                                                <td>
-                                                    <div class="font-medium"><?= htmlspecialchars($item['title']) ?></div>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge--primary"><?= htmlspecialchars($item['course_title']) ?></span>
-                                                </td>
+                                                <td><div class="font-medium"><?= htmlspecialchars($item['title']) ?></div></td>
+                                                <td><span class="badge badge--primary"><?= htmlspecialchars($item['course_title']) ?></span></td>
                                                 <td>
                                                     <div class="flex flex--gap-2">
-                                                        <a href="?page=admin&section=archive&action=restore_topic&id=<?= $item['id'] ?>" 
-                                                           class="btn btn--sm btn--success"
-                                                           data-tooltip="Restore topic">
-                                                            🔄 Restore
-                                                        </a>
-                                                        <a href="?page=admin&section=archive&action=delete_permanent_topic&id=<?= $item['id'] ?>" 
-                                                           class="btn btn--sm btn--danger"
-                                                           onclick="return confirm('Permanently delete this topic? This cannot be undone.')"
-                                                           data-tooltip="Delete permanently">
-                                                            🗑️ Delete Permanently
-                                                        </a>
+                                                        <a href="?page=admin&section=archive&action=restore_topic&id=<?= $item['id'] ?>" class="btn btn--sm btn--success" data-tooltip="Restore topic">🔄 Restore</a>
+                                                        <a href="?page=admin&section=archive&action=delete_permanent_topic&id=<?= $item['id'] ?>" class="btn btn--sm btn--danger" onclick="return confirm('Permanently delete this topic? This cannot be undone.')" data-tooltip="Delete permanently">🗑️ Delete Permanently</a>
                                                     </div>
                                                 </td>
                                             </tr>
-                                            <?php endforeach; ?>
+                                            <?php endforeach; endif; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -180,6 +162,7 @@
 
                             <!-- Archived Courses -->
                             <div id="archive-courses" class="archive-table" style="display:none;">
+                                <h3 class="mb-2">Archived Courses</h3>
                                 <div class="table-container">
                                     <table class="table">
                                         <thead>
@@ -190,31 +173,20 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($archived_courses as $item): ?>
+                                            <?php if (empty($archived_courses)): ?>
+                                                <tr><td colspan="3" class="text-center text-muted">No archived courses found.</td></tr>
+                                            <?php else: foreach ($archived_courses as $item): ?>
                                             <tr>
-                                                <td>
-                                                    <span class="badge badge--primary"><?= htmlspecialchars($item['code']) ?></span>
-                                                </td>
-                                                <td>
-                                                    <div class="font-medium"><?= htmlspecialchars($item['title']) ?></div>
-                                                </td>
+                                                <td><span class="badge badge--primary"><?= htmlspecialchars($item['code']) ?></span></td>
+                                                <td><div class="font-medium"><?= htmlspecialchars($item['title']) ?></div></td>
                                                 <td>
                                                     <div class="flex flex--gap-2">
-                                                        <a href="?page=admin&section=archive&action=restore_course&id=<?= $item['id'] ?>" 
-                                                           class="btn btn--sm btn--success"
-                                                           data-tooltip="Restore course">
-                                                            🔄 Restore
-                                                        </a>
-                                                        <a href="?page=admin&section=archive&action=delete_permanent_course&id=<?= $item['id'] ?>" 
-                                                           class="btn btn--sm btn--danger"
-                                                           onclick="return confirm('Permanently delete this course? This cannot be undone.')"
-                                                           data-tooltip="Delete permanently">
-                                                            🗑️ Delete Permanently
-                                                        </a>
+                                                        <a href="?page=admin&section=archive&action=restore_course&id=<?= $item['id'] ?>" class="btn btn--sm btn--success" data-tooltip="Restore course">🔄 Restore</a>
+                                                        <a href="?page=admin&section=archive&action=delete_permanent_course&id=<?= $item['id'] ?>" class="btn btn--sm btn--danger" onclick="return confirm('Permanently delete this course? This cannot be undone.')" data-tooltip="Delete permanently">🗑️ Delete Permanently</a>
                                                     </div>
                                                 </td>
                                             </tr>
-                                            <?php endforeach; ?>
+                                            <?php endforeach; endif; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -222,6 +194,7 @@
 
                             <!-- Archived Users -->
                             <div id="archive-users" class="archive-table" style="display:none;">
+                                <h3 class="mb-2">Archived Users</h3>
                                 <div class="table-container">
                                     <table class="table">
                                         <thead>
@@ -229,36 +202,27 @@
                                                 <th>Full Name</th>
                                                 <th>Username</th>
                                                 <th>Email</th>
+                                                <th>Role</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($archived_users as $item): ?>
+                                            <?php if (empty($archived_users)): ?>
+                                                <tr><td colspan="5" class="text-center text-muted">No archived users found.</td></tr>
+                                            <?php else: foreach ($archived_users as $item): ?>
                                             <tr>
-                                                <td>
-                                                    <div class="font-medium"><?= htmlspecialchars($item['first_name'] . ' ' . $item['last_name']) ?></div>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge--info"><?= htmlspecialchars($item['username']) ?></span>
-                                                </td>
+                                                <td><div class="font-medium"><?= htmlspecialchars($item['first_name'] . ' ' . $item['last_name']) ?></div></td>
+                                                <td><span class="badge badge--info"><?= htmlspecialchars($item['username']) ?></span></td>
                                                 <td><?= htmlspecialchars($item['email']) ?></td>
+                                                <td><span class="badge badge--primary"><?= htmlspecialchars($item['role']) ?></span></td>
                                                 <td>
                                                     <div class="flex flex--gap-2">
-                                                        <a href="?page=admin&section=archive&action=restore_user&id=<?= $item['id'] ?>" 
-                                                           class="btn btn--sm btn--success"
-                                                           data-tooltip="Restore user">
-                                                            🔄 Restore
-                                                        </a>
-                                                        <a href="?page=admin&section=archive&action=delete_permanent_user&id=<?= $item['id'] ?>" 
-                                                           class="btn btn--sm btn--danger"
-                                                           onclick="return confirm('Permanently delete this user? This cannot be undone.')"
-                                                           data-tooltip="Delete permanently">
-                                                            🗑️ Delete Permanently
-                                                        </a>
+                                                        <a href="?page=admin&section=archive&action=restore_user&id=<?= $item['id'] ?>" class="btn btn--sm btn--success" data-tooltip="Restore user">🔄 Restore</a>
+                                                        <a href="?page=admin&section=archive&action=delete_permanent_user&id=<?= $item['id'] ?>" class="btn btn--sm btn--danger" onclick="return confirm('Permanently delete this user? This cannot be undone.')" data-tooltip="Delete permanently">🗑️ Delete Permanently</a>
                                                     </div>
                                                 </td>
                                             </tr>
-                                            <?php endforeach; ?>
+                                            <?php endforeach; endif; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -272,6 +236,12 @@
 
     <script src="js/script.js"></script>
     <script>
+    // Helper to get URL parameter
+    function getUrlParam(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const typeSelect = document.getElementById('archive-type');
         const searchInput = document.getElementById('archive-search');
@@ -281,6 +251,12 @@
             courses: document.getElementById('archive-courses'),
             users: document.getElementById('archive-users')
         };
+
+        // Set initial filter from URL param if present
+        const urlType = getUrlParam('type');
+        if (urlType && tables[urlType]) {
+            typeSelect.value = urlType;
+        }
 
         function showTable(type) {
             for (const key in tables) {
@@ -293,7 +269,6 @@
             const table = tables[type].querySelector('table');
             const rows = table.querySelectorAll('tbody tr');
             keyword = keyword.toLowerCase();
-            
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(keyword) ? '' : 'none';
@@ -302,14 +277,32 @@
 
         typeSelect.addEventListener('change', function() {
             showTable(this.value);
+            // Update URL without reloading
+            const url = new URL(window.location.href);
+            url.searchParams.set('type', this.value);
+            window.history.replaceState({}, '', url);
         });
 
         searchInput.addEventListener('input', function() {
             filterTable(typeSelect.value, this.value);
         });
 
-        // Initialize with first table
+        // Initialize with first table or from URL
         showTable(typeSelect.value);
+
+        // Update all restore/delete links to include current filter
+        function updateActionLinks() {
+            const type = typeSelect.value;
+            document.querySelectorAll('.archive-table a').forEach(link => {
+                if (link.href && (link.href.includes('restore') || link.href.includes('delete_permanent'))) {
+                    const url = new URL(link.href, window.location.origin);
+                    url.searchParams.set('type', type);
+                    link.href = url.toString();
+                }
+            });
+        }
+        updateActionLinks();
+        typeSelect.addEventListener('change', updateActionLinks);
     });
     </script>
 </body>

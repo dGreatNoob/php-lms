@@ -73,45 +73,28 @@ class LectureController {
             $topic_id = intval($_POST['topic_id'] ?? 0);
             $title = trim($_POST['title'] ?? '');
             $content = trim($_POST['content'] ?? '');
-            $file_path = $lecture['file_path'];
-            $image_path = $lecture['image_path'];
-            $requires_submission = !empty($_POST['requires_submission']) ? 1 : 0;
-            $submission_type = $_POST['submission_type'] ?? 'file';
-            $submission_instructions = trim($_POST['submission_instructions'] ?? '');
+            $allow_submissions = !empty($_POST['allow_submissions']) ? 1 : 0;
+            $attachment = $lecture['attachment'];
             $due_date = !empty($_POST['due_date']) ? $_POST['due_date'] : null;
             // Handle file deletion
-            if (!empty($_POST['delete_file']) && $file_path) {
-                $this->deleteUpload($file_path);
-                $file_path = null;
-            }
-            if (!empty($_POST['delete_image']) && $image_path) {
-                $this->deleteUpload($image_path);
-                $image_path = null;
+            if (!empty($_POST['delete_attachment']) && $attachment) {
+                $this->deleteUpload($attachment);
+                $attachment = null;
             }
             // Handle file upload
-            if (!empty($_FILES['file']['name'])) {
-                $new_file = $this->handleUpload($_FILES['file'], ['pdf','doc','docx','txt','zip']);
+            if (!empty($_FILES['attachment']['name'])) {
+                $new_file = $this->handleUpload($_FILES['attachment'], ['pdf','doc','docx','txt','zip']);
                 if ($new_file === false) {
                     $error = 'Invalid file upload.';
                 } else {
-                    if ($file_path) $this->deleteUpload($file_path);
-                    $file_path = $new_file;
-                }
-            }
-            // Handle image upload
-            if (!empty($_FILES['image']['name'])) {
-                $new_image = $this->handleUpload($_FILES['image'], ['jpg','jpeg','png','gif','webp']);
-                if ($new_image === false) {
-                    $error = 'Invalid image upload.';
-                } else {
-                    if ($image_path) $this->deleteUpload($image_path);
-                    $image_path = $new_image;
+                    if ($attachment) $this->deleteUpload($attachment);
+                    $attachment = $new_file;
                 }
             }
             if (!$topic_id || !$title) {
                 $error = 'Topic and title are required.';
             } elseif (!$error) {
-                $result = Lecture::update($id, $topic_id, $title, $content, $file_path, $image_path, $requires_submission, $submission_type, $submission_instructions, $due_date);
+                $result = Lecture::update($id, $topic_id, $title, $content, $attachment, $allow_submissions, $due_date);
                 if ($result) {
                     // Log the activity
                     $user_id = $_SESSION['user_id'] ?? null;
@@ -175,7 +158,8 @@ class LectureController {
                 }
             }
         }
-        header('Location: ?page=admin&section=archive');
+        $type = $_GET['type'] ?? 'lectures';
+        header('Location: ?page=admin&section=archive&type=' . urlencode($type));
         exit;
     }
     public function archiveList() {

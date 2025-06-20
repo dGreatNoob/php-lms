@@ -154,32 +154,61 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div class="modal-backdrop" id="delete-modal" style="display: none;">
+    <div class="modal-backdrop" id="archive-modal" style="display: none;">
         <div class="modal">
             <div class="modal__header">
-                <h3 class="modal__title">Confirm Deletion</h3>
-                <button class="modal__close" data-modal-close="#delete-modal">&times;</button>
+                <h3 class="modal__title">Confirm Archive</h3>
+                <button class="modal__close" data-modal-close="#archive-modal">&times;</button>
             </div>
             <div class="modal__body">
-                <div class="alert alert--error">
+                <div class="alert alert--warning">
                     <span class="alert__icon">⚠️</span>
                     <div class="alert__content">
-                        <div class="alert__title">Warning!</div>
-                        <div class="alert__message" id="delete-modal-warning-message">
+                        <div class="alert__title">Archive Warning!</div>
+                        <div class="alert__message" id="archive-modal-warning-message">
                             This is a generic warning.
                         </div>
                     </div>
                 </div>
-                <p class="mt-4">Are you sure you want to proceed? This action cannot be undone.</p>
+                <p class="mt-4">Are you sure you want to archive this course? You can restore it later from the Archive/Restore section.</p>
             </div>
             <div class="modal__footer">
-                <button class="btn btn--secondary" data-modal-close="#delete-modal">Cancel</button>
-                <a href="#" id="confirm-delete-btn" class="btn btn--danger">Confirm Delete</a>
+                <button class="btn btn--secondary" data-modal-close="#archive-modal">Cancel</button>
+                <a href="#" id="confirm-archive-btn" class="btn btn--danger">Confirm Archive</a>
             </div>
         </div>
     </div>
     
     <script src="js/theme.js"></script>
     <script src="js/script.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.js-delete-trigger').forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                const archiveUrl = trigger.dataset.deleteUrl;
+                const entityName = trigger.dataset.entityName;
+                let warning = `You are about to archive the course: <strong>${entityName}</strong>. This will also archive all its topics and lectures.`;
+                document.getElementById('archive-modal-warning-message').innerHTML = warning;
+                document.getElementById('confirm-archive-btn').href = archiveUrl;
+                document.getElementById('archive-modal').style.display = 'flex';
+            });
+        });
+        document.querySelectorAll('[data-modal-close]').forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                const modal = document.querySelector(trigger.dataset.modalClose);
+                if(modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+        document.getElementById('archive-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+    });
+    </script>
 </body>
 </html> 

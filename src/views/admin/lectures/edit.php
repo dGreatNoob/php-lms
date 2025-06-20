@@ -157,17 +157,17 @@
                                     </div>
                                 </div>
 
-                                <?php if (!empty($lecture['file_path'])): ?>
+                                <?php if (!empty($lecture['attachment'])): ?>
                                     <div class="form__group">
                                         <label class="form__label">Current File</label>
                                         <div class="flex flex--items-center flex--gap-2">
-                                            <a href="uploads/<?= htmlspecialchars(basename($lecture['file_path'])) ?>" 
+                                            <a href="uploads/<?= htmlspecialchars(basename($lecture['attachment'])) ?>" 
                                                download 
                                                class="btn btn--sm btn--secondary">
-                                                📎 <?= htmlspecialchars(basename($lecture['file_path'])) ?>
+                                                📎 <?= htmlspecialchars(basename($lecture['attachment'])) ?>
                                             </a>
                                             <label class="form__checkbox">
-                                                <input type="checkbox" name="delete_file" value="1">
+                                                <input type="checkbox" name="delete_attachment" value="1">
                                                 <span class="ml-2">Delete this file</span>
                                             </label>
                                         </div>
@@ -175,13 +175,13 @@
                                 <?php endif; ?>
 
                                 <div class="form__group">
-                                    <label for="file" class="form__label">
+                                    <label for="attachment" class="form__label">
                                         Attach File
                                     </label>
                                     <input 
                                         type="file" 
-                                        id="file"
-                                        name="file" 
+                                        id="attachment"
+                                        name="attachment" 
                                         class="form__input" 
                                         accept=".pdf,.doc,.docx,.txt,.zip"
                                     >
@@ -190,89 +190,13 @@
                                     </div>
                                 </div>
 
-                                <?php if (!empty($lecture['image_path'])): ?>
-                                    <div class="form__group">
-                                        <label class="form__label">Current Image</label>
-                                        <div class="flex flex--items-center flex--gap-2">
-                                            <a href="uploads/<?= htmlspecialchars(basename($lecture['image_path'])) ?>" 
-                                               target="_blank"
-                                               class="btn btn--sm btn--secondary">
-                                                🖼️ <?= htmlspecialchars(basename($lecture['image_path'])) ?>
-                                            </a>
-                                            <label class="form__checkbox">
-                                                <input type="checkbox" name="delete_image" value="1">
-                                                <span class="ml-2">Delete this image</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-
-                                <div class="form__group">
-                                    <label for="image" class="form__label">
-                                        Attach Image
-                                    </label>
-                                    <input 
-                                        type="file" 
-                                        id="image"
-                                        name="image" 
-                                        class="form__input" 
-                                        accept="image/*"
-                                    >
-                                    <div class="form__help-text">
-                                        Supported formats: JPG, JPEG, PNG, GIF, WEBP (optional)
-                                    </div>
-                                </div>
-
                                 <div class="form__group">
                                     <label class="form__label">
-                                        <input type="checkbox" name="requires_submission" value="1" class="form__checkbox" <?= $lecture['requires_submission'] ? 'checked' : '' ?>>
-                                        <span class="ml-2">Requires Submission</span>
+                                        <input type="checkbox" name="allow_submissions" value="1" class="form__checkbox" <?= $lecture['allow_submissions'] ? 'checked' : '' ?>>
+                                        <span class="ml-2">Allow Submissions</span>
                                     </label>
                                     <div class="form__help-text">
                                         Check this if students need to submit assignments for this lecture
-                                    </div>
-                                </div>
-
-                                <div id="submission-options" class="form__group" style="display:<?= $lecture['requires_submission'] ? 'block' : 'none' ?>;">
-                                    <div class="card card--secondary">
-                                        <div class="card__header">
-                                            <h3 class="card__title">Submission Settings</h3>
-                                        </div>
-                                        <div class="card__body">
-                                            <div class="form__group">
-                                                <label class="form__label form__label--required">Submission Type</label>
-                                                <div class="flex flex--gap-4">
-                                                    <label class="form__radio">
-                                                        <input type="radio" name="submission_type" value="file" <?= $lecture['submission_type'] === 'file' ? 'checked' : '' ?>>
-                                                        <span class="form__radio-label">File Upload</span>
-                                                    </label>
-                                                    <label class="form__radio">
-                                                        <input type="radio" name="submission_type" value="text" <?= $lecture['submission_type'] === 'text' ? 'checked' : '' ?>>
-                                                        <span class="form__radio-label">Text Response</span>
-                                                    </label>
-                                                    <label class="form__radio">
-                                                        <input type="radio" name="submission_type" value="both" <?= $lecture['submission_type'] === 'both' ? 'checked' : '' ?>>
-                                                        <span class="form__radio-label">Both</span>
-                                                    </label>
-                                                </div>
-                                            </div>
-
-                                            <div class="form__group">
-                                                <label for="submission_instructions" class="form__label">
-                                                    Submission Instructions
-                                                </label>
-                                                <textarea 
-                                                    id="submission_instructions"
-                                                    name="submission_instructions" 
-                                                    class="form__textarea" 
-                                                    rows="3"
-                                                    placeholder="Provide clear instructions for students on what to submit..."
-                                                ><?= htmlspecialchars($lecture['submission_instructions']) ?></textarea>
-                                                <div class="form__help-text">
-                                                    Instructions that will be shown to students when they submit
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
 

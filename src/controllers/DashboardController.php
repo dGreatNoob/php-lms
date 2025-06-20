@@ -158,10 +158,13 @@ class DashboardController {
         require_once __DIR__ . '/../models/Topic.php';
         require_once __DIR__ . '/../models/Course.php';
         require_once __DIR__ . '/../models/User.php';
-        $archived_lectures = Lecture::all(1);
+        $archived_lectures = Lecture::allArchived();
         $archived_topics = Topic::allArchived();
         $archived_courses = Course::allArchived();
         $archived_users = User::allArchived();
         include __DIR__ . '/../views/admin/archive/index.php';
+        $type = $_GET['type'] ?? 'lectures';
+        header('Location: ?page=admin&section=archive&type=' . urlencode($type));
+        exit;
     }
 } 
