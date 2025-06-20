@@ -1,3 +1,20 @@
+<?php
+// Count pending submissions for the current student
+if (!isset($stats)) $stats = [];
+$stats['pending_submissions'] = 0;
+if (!empty($lectures_by_topic) && !empty($user_id)) {
+    foreach ($lectures_by_topic as $topic_lectures) {
+        foreach ($topic_lectures as $lecture) {
+            if (!empty($lecture['allow_submissions'])) {
+                $existing = Submission::findByStudentAndLecture($user_id, $lecture['id']);
+                if (!$existing) {
+                    $stats['pending_submissions']++;
+                }
+            }
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
