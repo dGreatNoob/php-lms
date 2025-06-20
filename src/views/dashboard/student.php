@@ -100,23 +100,31 @@
                             if (!function_exists('render_topic')) {
                                 function render_topic($topic, $lectures_by_topic, $user_id, $level = 0) {
                                     $indent_class = 'ml-' . ($level * 4);
-                                    echo "<div class='topic-group {$indent_class}'>";
-                                    echo "<h4 class='font-semibold text-lg mb-3'>" . htmlspecialchars($topic['title']) . "</h4>";
-
-                                    if (!empty($lectures_by_topic[$topic['id']])) {
-                                        echo "<div class='space-y-4'>";
-                                        foreach ($lectures_by_topic[$topic['id']] as $lecture) {
-                                            render_lecture($lecture, $user_id);
-                                        }
-                                        echo "</div>";
-                                    }
-
-                                    if (!empty($topic['children'])) {
-                                        foreach ($topic['children'] as $child_topic) {
-                                            render_topic($child_topic, $lectures_by_topic, $user_id, $level + 1);
-                                        }
-                                    }
-                                    echo "</div>";
+                                    $topic_id = $topic['id'];
+                                    ?>
+                                    <div class="topic-accordion topic-accordion-level-<?= $level ?>" id="topic-accordion-<?= $topic_id ?>">
+                                        <button type="button" class="topic-accordion__title flex flex--between" aria-expanded="false" aria-controls="topic-details-<?= $topic_id ?>">
+                                            <span><?= htmlspecialchars($topic['title']) ?></span>
+                                            <span class="badge badge--info">Topic</span>
+                                        </button>
+                                        <div class="topic-accordion__details" id="topic-details-<?= $topic_id ?>" style="display: none;">
+                                            <?php
+                                            if (!empty($lectures_by_topic[$topic_id])) {
+                                                echo "<div class='mb-2'>";
+                                                foreach ($lectures_by_topic[$topic_id] as $lecture) {
+                                                    render_lecture($lecture, $user_id);
+                                                }
+                                                echo "</div>";
+                                            }
+                                            if (!empty($topic['children'])) {
+                                                foreach ($topic['children'] as $child_topic) {
+                                                    render_topic($child_topic, $lectures_by_topic, $user_id, $level + 1);
+                                                }
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
+                                    <?php
                                 }
                             }
 
@@ -135,104 +143,88 @@
                                         }
                                     }
                                     ?>
-                                    <div class="card lecture-card lecture-card--<?= $status ?>">
-                                        <div class="card__body">
-                                            <div class="flex flex--between mb-3">
-                                                <h5 class="font-medium"><?= htmlspecialchars($lecture['title']) ?></h5>
-                                                <span class="badge badge--<?= $status === 'graded' ? 'success' : ($status === 'submitted' ? 'info' : 'muted') ?>">
-                                                    <?= $status_text ?>
-                                                </span>
-                                            </div>
+                                    <div class="lecture-accordion" id="lecture-accordion-<?= $lecture['id'] ?>">
+                                        <button type="button" class="lecture-accordion__title flex flex--between" aria-expanded="false" aria-controls="lecture-details-<?= $lecture['id'] ?>">
+                                            <span><?= htmlspecialchars($lecture['title']) ?></span>
+                                            <span class="badge badge--<?= $status === 'graded' ? 'success' : ($status === 'submitted' ? 'info' : 'muted') ?>">
+                                                <?= $status_text ?>
+                                            </span>
+                                        </button>
+                                        <div class="lecture-accordion__details" id="lecture-details-<?= $lecture['id'] ?>" style="display: none;">
+                                            <div class="card__body">
+                                                <p class="text-muted mb-3"><?= htmlspecialchars($lecture['content'] ?? '') ?></p>
 
-                                            <p class="text-muted mb-3"><?= htmlspecialchars($lecture['content'] ?? '') ?></p>
-
-                                            <?php if (!empty($lecture['file_path']) || !empty($lecture['image_path'])): ?>
-                                                <div class="flex flex--gap-2 mb-4">
-                                                    <?php if (!empty($lecture['file_path'])): ?>
-                                                        <a href="uploads/<?= htmlspecialchars($lecture['file_path']) ?>" download class="btn btn--sm btn--secondary">
-                                                            📎 Download File
+                                                <?php if (!empty($lecture['attachment'])): ?>
+                                                    <div class="flex flex--gap-2 mb-4">
+                                                        <a href="uploads/<?= htmlspecialchars(basename($lecture['attachment'])) ?>" download class="btn btn--sm btn--secondary">
+                                                            📎 Download Attachment
                                                         </a>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($lecture['image_path'])): ?>
-                                                        <a href="uploads/<?= htmlspecialchars($lecture['image_path']) ?>" target="_blank" class="btn btn--sm btn--secondary">
-                                                            🖼️ View Image
-                                                        </a>
-                                                    <?php endif; ?>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <?php if ($existing && ($existing['grade'] || $existing['feedback'])): ?>
-                                                <div class="alert alert--success mb-4">
-                                                    <div class="alert__content">
-                                                        <strong>Feedback:</strong> 
-                                                        <?php if($existing['grade']) echo "Grade: ".htmlspecialchars($existing['grade']); ?>
-                                                        <?= nl2br(htmlspecialchars($existing['feedback'])) ?>
                                                     </div>
-                                                </div>
-                                            <?php endif; ?>
+                                                <?php endif; ?>
 
-                                            <?php if (!empty($lecture['requires_submission'])): ?>
-                                                <div class="submission-area">
-                                                    <button class="btn btn--primary btn--sm" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                                                        <?= $existing ? 'View/Resubmit' : 'Submit Assignment' ?>
-                                                    </button>
-                                                    <div class="submission-form mt-4" style="display: none;">
-                                                        <div class="border border-primary-200 rounded-lg p-4 bg-primary-50">
-                                                            <h6 class="font-semibold mb-3">Submission Details</h6>
-                                                            <?php if (!empty($lecture['submission_instructions'])): ?>
-                                                                <div class="mb-3">
-                                                                    <p class="text-sm"><strong>Instructions:</strong></p>
-                                                                    <p class="text-sm text-muted"><?= nl2br(htmlspecialchars($lecture['submission_instructions'])) ?></p>
-                                                                </div>
-                                                            <?php endif; ?>
-
-                                                            <?php if ($existing): ?>
-                                                                <div class="alert alert--info mb-3">
-                                                                    <div class="alert__content">
-                                                                        Submitted on <?= htmlspecialchars($existing['submitted_at']) ?>
-                                                                    </div>
-                                                                </div>
-                                                                <?php if ($existing['file_path']): ?>
-                                                                    <a href="uploads/<?= htmlspecialchars($existing['file_path']) ?>" download class="btn btn--sm btn--secondary mb-2">
-                                                                        📎 Download Your Submission
-                                                                    </a>
-                                                                <?php endif; ?>
-                                                                <?php if ($existing['text_submission']): ?>
-                                                                    <div class="mb-3">
-                                                                        <p class="text-sm font-medium">Your Text Submission:</p>
-                                                                        <div class="bg-white p-3 rounded border text-sm">
-                                                                            <?= nl2br(htmlspecialchars($existing['text_submission'])) ?>
-                                                                        </div>
-                                                                    </div>
-                                                                <?php endif; ?>
-                                                            <?php endif; ?>
-
-                                                            <form method="POST" enctype="multipart/form-data" class="space-y-3">
-                                                                <input type="hidden" name="lecture_id" value="<?= $lecture['id'] ?>">
-                                                                <?php if ($lecture['submission_type'] === 'file' || $lecture['submission_type'] === 'both'): ?>
-                                                                    <div class="form__group">
-                                                                        <label for="file_<?= $lecture['id'] ?>" class="form__label">
-                                                                            Upload File <?= $existing ? '(Optional: replace existing)' : '' ?>
-                                                                        </label>
-                                                                        <input type="file" id="file_<?= $lecture['id'] ?>" name="submission_file" class="form__input">
-                                                                    </div>
-                                                                <?php endif; ?>
-                                                                <?php if ($lecture['submission_type'] === 'text' || $lecture['submission_type'] === 'both'): ?>
-                                                                    <div class="form__group">
-                                                                        <label for="text_<?= $lecture['id'] ?>" class="form__label">
-                                                                            Text Submission
-                                                                        </label>
-                                                                        <textarea id="text_<?= $lecture['id'] ?>" name="submission_text" rows="4" class="form__textarea" placeholder="Enter your submission text here..."><?= $existing['text_submission'] ?? '' ?></textarea>
-                                                                    </div>
-                                                                <?php endif; ?>
-                                                                <button type="submit" name="<?= $existing ? 'resubmit' : 'submit_lecture' ?>" value="1" class="btn btn--primary">
-                                                                    <?= $existing ? '🔄 Resubmit' : '📤 Submit Assignment' ?>
-                                                                </button>
-                                                            </form>
+                                                <?php if ($existing && ($existing['grade'] || $existing['feedback'])): ?>
+                                                    <div class="alert alert--success mb-4">
+                                                        <div class="alert__content">
+                                                            <strong>Feedback:</strong> 
+                                                            <?php if($existing['grade']) echo "Grade: ".htmlspecialchars($existing['grade']); ?>
+                                                            <?= nl2br(htmlspecialchars($existing['feedback'])) ?>
                                                         </div>
-                                                     </div>
-                                                </div>
-                                            <?php endif; ?>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <?php if (!empty($lecture['allow_submissions'])): ?>
+                                                    <?php if (!empty($lecture['due_date'])): ?>
+                                                        <?php 
+                                                            $now = new DateTime();
+                                                            $due = new DateTime($lecture['due_date']);
+                                                            $is_overdue = $now > $due && empty($existing);
+                                                        ?>
+                                                        <div class="alert alert--info mb-2">
+                                                            <strong>Submission Deadline:</strong> <?= date('F j, Y, g:i A', strtotime($lecture['due_date'])) ?>
+                                                            <?php if ($is_overdue): ?>
+                                                                <span style="color: #dc2626; font-weight: bold; margin-left: 1em;">Overdue</span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    <div class="submission-area mt-4">
+                                                        <h6 class="font-semibold mb-3">Submission</h6>
+                                                        <?php if ($existing): ?>
+                                                            <div class="alert alert--info mb-3">
+                                                                <div class="alert__content">
+                                                                    Submitted on <?= htmlspecialchars($existing['submitted_at']) ?>
+                                                                </div>
+                                                            </div>
+                                                            <?php if ($existing['file_path']): ?>
+                                                                <a href="uploads/<?= htmlspecialchars($existing['file_path']) ?>" download class="btn btn--sm btn--secondary mb-2">
+                                                                    📎 Download Your Submission
+                                                                </a>
+                                                            <?php endif; ?>
+                                                            <?php if ($existing['text_submission']): ?>
+                                                                <div class="mb-2"><strong>Your Text Submission:</strong><br><?= nl2br(htmlspecialchars($existing['text_submission'])) ?></div>
+                                                            <?php endif; ?>
+                                                        <?php endif; ?>
+                                                        <form method="POST" enctype="multipart/form-data">
+                                                            <input type="hidden" name="lecture_id" value="<?= $lecture['id'] ?>">
+                                                            <?php if ($existing): ?>
+                                                                <input type="hidden" name="resubmit" value="1">
+                                                            <?php else: ?>
+                                                                <input type="hidden" name="submit_lecture" value="1">
+                                                            <?php endif; ?>
+                                                            <div class="form__group">
+                                                                <label for="submission_text_<?= $lecture['id'] ?>" class="form__label">Text Submission (optional)</label>
+                                                                <textarea id="submission_text_<?= $lecture['id'] ?>" name="submission_text" class="form__textarea" rows="3"></textarea>
+                                                            </div>
+                                                            <div class="form__group">
+                                                                <label for="submission_file_<?= $lecture['id'] ?>" class="form__label">File Submission (optional)</label>
+                                                                <input type="file" id="submission_file_<?= $lecture['id'] ?>" name="submission_file" class="form__input">
+                                                            </div>
+                                                            <button type="submit" class="btn btn--primary mt-2">
+                                                                <?= $existing ? 'Resubmit' : 'Submit' ?>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
                                     <?php
@@ -321,6 +313,84 @@
             accordions[0].classList.add('accordion__item--active');
             console.log('First accordion opened by default');
         }
+    });
+    </script>
+    <style>
+    .lecture-accordion { border-bottom: 1px solid #e5e7eb; margin-bottom: 0.5em; }
+    .lecture-accordion__title {
+        width: 100%;
+        background: none;
+        border: none;
+        font-size: 1.08em;
+        font-weight: 500;
+        padding: 1em 0.5em;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        outline: none;
+        transition: background 0.15s;
+    }
+    .lecture-accordion__title[aria-expanded="true"] { background: #f3f4f6; }
+    .lecture-accordion__details { padding: 0.5em 0.5em 1em 0.5em; }
+    .topic-accordion { border-bottom: 1px solid #e5e7eb; margin-bottom: 0.5em; }
+    .topic-accordion__title {
+        width: 100%;
+        background: none;
+        border: none;
+        font-size: 1.04em;
+        font-weight: 500;
+        padding: 0.7em 0.5em;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        outline: none;
+        transition: background 0.15s;
+    }
+    .topic-accordion__title[aria-expanded="true"] { background: #f3f4f6; }
+    .topic-accordion__details { padding: 0.5em 0.5em 0.5em 1.5em; }
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Topic accordions (per level)
+        for (let level = 0; level < 10; level++) {
+            const topicAccordions = document.querySelectorAll('.topic-accordion-level-' + level + ' .topic-accordion__title');
+            topicAccordions.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const expanded = this.getAttribute('aria-expanded') === 'true';
+                    // Close all at this level
+                    topicAccordions.forEach(b => {
+                        b.setAttribute('aria-expanded', 'false');
+                        document.getElementById('topic-details-' + b.parentElement.id.split('-').pop()).style.display = 'none';
+                    });
+                    // Open this one if it was closed
+                    if (!expanded) {
+                        this.setAttribute('aria-expanded', 'true');
+                        document.getElementById('topic-details-' + this.parentElement.id.split('-').pop()).style.display = 'block';
+                    }
+                });
+            });
+        }
+        // Lecture accordions (as before)
+        const accordions = document.querySelectorAll('.lecture-accordion__title');
+        accordions.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const expanded = this.getAttribute('aria-expanded') === 'true';
+                // Close all
+                accordions.forEach(b => {
+                    b.setAttribute('aria-expanded', 'false');
+                    document.getElementById('lecture-details-' + b.parentElement.id.split('-').pop()).style.display = 'none';
+                });
+                // Open this one if it was closed
+                if (!expanded) {
+                    this.setAttribute('aria-expanded', 'true');
+                    document.getElementById('lecture-details-' + this.parentElement.id.split('-').pop()).style.display = 'block';
+                }
+            });
+        });
     });
     </script>
 </body>

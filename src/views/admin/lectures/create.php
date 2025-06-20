@@ -181,8 +181,8 @@
 
                                 <div class="form__group">
                                     <label class="form__label">
-                                        <input type="checkbox" name="requires_submission" value="1" class="form__checkbox">
-                                        <span class="ml-2">Requires Submission</span>
+                                        <input type="checkbox" name="allow_submissions" value="1" class="form__checkbox" checked>
+                                        <span class="ml-2">Allow Submissions</span>
                                     </label>
                                     <div class="form__help-text">
                                         Check this if students need to submit assignments for this lecture
