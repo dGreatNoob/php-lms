@@ -69,7 +69,7 @@ start_dev() {
         log_success "Development environment is running!"
         log_info "Application: http://localhost:8080"
         log_info "phpMyAdmin: http://localhost:8081"
-        log_info "Database: localhost:3306"
+        log_info "Database: localhost:3307"
     else
         log_error "Failed to start development environment"
         docker-compose -f $COMPOSE_FILE logs

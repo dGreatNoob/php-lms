@@ -4,14 +4,14 @@
  * Handles routing, authentication, and security
  */
 
+// Load configuration first (defines env() function)
+require_once __DIR__ . '/../config/db.php';
+
 // Start session with secure settings
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_secure', env('SECURE_COOKIES', false) ? 1 : 0);
 session_start();
-
-// Load configuration and helpers
-require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/helpers/Security.php';
 require_once __DIR__ . '/../src/helpers/Logger.php';
 
