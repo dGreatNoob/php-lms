@@ -1,0 +1,79 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [ staging ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mysqli, mbstring, gd
+
+    - name: Build Docker image
+      run: |
+        docker build -t php-lms:staging .
+        
+    - name: Create staging environment file
+      run: |
+        cat > .env.staging << EOF
+        APP_ENV=staging
+        APP_DEBUG=false
+        APP_NAME="PHP LMS - Staging"
+        BASE_URL=${{ secrets.STAGING_BASE_URL }}
+        DB_HOST=db
+        DB_PORT=3306
+        DB_NAME=${{ secrets.STAGING_DB_NAME }}
+        DB_USER=${{ secrets.STAGING_DB_USER }}
+        DB_PASS=${{ secrets.STAGING_DB_PASS }}
+        UPLOAD_MAX_SIZE=20M
+        ALLOWED_FILE_TYPES=pdf,doc,docx,jpg,jpeg,png,gif,mp4,mp3
+        SESSION_NAME=php_lms_staging_session
+        SESSION_TIMEOUT=7200
+        CSRF_TOKEN_NAME=csrf_token
+        BCRYPT_ROUNDS=12
+        EOF
+
+    - name: Deploy to staging server
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USER }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        script: |
+          cd /var/www/php-lms-staging
+          git pull origin staging
+          docker-compose -f docker-compose.staging.yml down
+          docker-compose -f docker-compose.staging.yml up -d --build
+          
+          # Wait for containers to be ready
+          sleep 30
+          
+          # Run database migrations if needed
+          docker-compose -f docker-compose.staging.yml exec -T app php database/migrate.php
+          
+          # Clear any application cache
+          docker-compose -f docker-compose.staging.yml exec -T app php artisan cache:clear || echo "No cache clear needed"
+
+    - name: Health check
+      run: |
+        sleep 60
+        curl -f ${{ secrets.STAGING_BASE_URL }}/health || exit 1
+
+    - name: Notify deployment status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: "Staging deployment ${{ job.status }}"
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

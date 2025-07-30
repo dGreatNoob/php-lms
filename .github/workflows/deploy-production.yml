@@ -1,0 +1,105 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      confirm_deploy:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+        default: ''
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Confirm deployment
+      if: github.event.inputs.confirm_deploy != 'deploy' && github.event_name == 'workflow_dispatch'
+      run: |
+        echo "Deployment not confirmed. Please type 'deploy' in the input field."
+        exit 1
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mysqli, mbstring, gd
+
+    - name: Run tests before deployment
+      run: |
+        if [ -f "vendor/bin/phpunit" ]; then
+          composer install --no-dev --optimize-autoloader
+          vendor/bin/phpunit
+        fi
+
+    - name: Build Docker image
+      run: |
+        docker build -t php-lms:production .
+        
+    - name: Create production environment file
+      run: |
+        cat > .env.production << EOF
+        APP_ENV=production
+        APP_DEBUG=false
+        APP_NAME="PHP LMS"
+        BASE_URL=${{ secrets.PROD_BASE_URL }}
+        DB_HOST=db
+        DB_PORT=3306
+        DB_NAME=${{ secrets.PROD_DB_NAME }}
+        DB_USER=${{ secrets.PROD_DB_USER }}
+        DB_PASS=${{ secrets.PROD_DB_PASS }}
+        UPLOAD_MAX_SIZE=50M
+        ALLOWED_FILE_TYPES=pdf,doc,docx,jpg,jpeg,png,gif,mp4,mp3,zip
+        SESSION_NAME=php_lms_prod_session
+        SESSION_TIMEOUT=14400
+        CSRF_TOKEN_NAME=csrf_token
+        BCRYPT_ROUNDS=12
+        FORCE_HTTPS=true
+        SECURE_COOKIES=true
+        EOF
+
+    - name: Deploy to production server
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USER }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          cd /var/www/php-lms-production
+          
+          # Create backup
+          docker-compose -f docker-compose.production.yml exec -T db mysqldump -u ${{ secrets.PROD_DB_USER }} -p${{ secrets.PROD_DB_PASS }} ${{ secrets.PROD_DB_NAME }} > backup_$(date +%Y%m%d_%H%M%S).sql
+          
+          # Deploy new version
+          git pull origin main
+          docker-compose -f docker-compose.production.yml down
+          docker-compose -f docker-compose.production.yml up -d --build
+          
+          # Wait for containers to be ready
+          sleep 60
+          
+          # Run database migrations if needed
+          docker-compose -f docker-compose.production.yml exec -T app php database/migrate.php
+          
+          # Clear caches and optimize
+          docker-compose -f docker-compose.production.yml exec -T app php -r "opcache_reset();" || echo "OPcache reset failed"
+
+    - name: Health check
+      run: |
+        sleep 90
+        curl -f ${{ secrets.PROD_BASE_URL }}/health || exit 1
+
+    - name: Notify deployment status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: "Production deployment ${{ job.status }} :rocket:"
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

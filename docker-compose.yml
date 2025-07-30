@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: php-lms-app-dev
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./storage/logs:/var/www/html/storage/logs
+      - ./storage/sessions:/var/www/html/storage/sessions
+    depends_on:
+      - db
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - lms-network
+
+  db:
+    image: mysql:8.0
+    container_name: php-lms-db-dev
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    restart: unless-stopped
+    networks:
+      - lms-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: php-lms-phpmyadmin-dev
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - lms-network
+
+volumes:
+  db_data:
+
+networks:
+  lms-network:
+    driver: bridge 

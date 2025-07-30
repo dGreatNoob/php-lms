@@ -53,17 +53,17 @@ CREATE TABLE `lectures` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Add submission requirement columns to lectures
-ALTER TABLE `lectures`
-    DROP COLUMN `file_path`,
-    DROP COLUMN `image_path`,
-    DROP COLUMN `requires_submission`,
-    DROP COLUMN `submission_type`,
-    DROP COLUMN `submission_instructions`;
+-- ALTER TABLE `lectures`
+--     DROP COLUMN `file_path`,
+--     DROP COLUMN `image_path`,
+--     DROP COLUMN `requires_submission`,
+--     DROP COLUMN `submission_type`,
+--     DROP COLUMN `submission_instructions`;
 
-ALTER TABLE `lectures`
-    ADD COLUMN `attachment` varchar(255) DEFAULT NULL AFTER `content`,
-    ADD COLUMN `allow_submissions` tinyint(1) NOT NULL DEFAULT '0' AFTER `attachment`,
-    ADD COLUMN `due_date` datetime DEFAULT NULL AFTER `allow_submissions`;
+-- ALTER TABLE `lectures`
+--     ADD COLUMN `attachment` varchar(255) DEFAULT NULL AFTER `content`,
+--     ADD COLUMN `allow_submissions` tinyint(1) NOT NULL DEFAULT '0' AFTER `attachment`,
+--     ADD COLUMN `due_date` datetime DEFAULT NULL AFTER `allow_submissions`;
 
 -- Enrollments
 CREATE TABLE enrollments (
@@ -112,4 +112,4 @@ CREATE TABLE activities (
     details TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB; 
+) ENGINE=InnoDB;
